@@ -6,6 +6,10 @@
 
 Программа предназначеня для скачивания обновлений с GitHub.
 
+Рабочий пример для скачивания:
+
+GitHubUpdater.CLI.exe --repositoryId="15127462" --mask "win64.zip$" --outputFolder="D:\Soft\livestreamer" --unpack --unpackFolder="livestreamer-twitch-gui"
+
 ***
 
 Всё добро под лицензией [MIT][License]

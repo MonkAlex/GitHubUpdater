@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
+using GitHubUpdater.Shared;
+using GitHubUpdater.Shared.Archive;
 
 namespace GitHubUpdater.CLI
 {
@@ -7,22 +10,22 @@ namespace GitHubUpdater.CLI
   {
     static void Main(string[] args)
     {
-      Console.WriteLine(string.Join("', '", args));
-      if (args.Length < 2)
+      var option = Option.CreateFromArgs();
+      if (option.HasError)
       {
-        Console.WriteLine("Run with repoId and current tagName. RepoId from https://api.github.com/repos/{owner}/{repo}");
+        Console.WriteLine(option.GetUsage());
         return;
       }
-
-      AsyncMain(int.Parse(args[0]), args[1]).Wait();
+      AsyncMain(option).Wait();
     }
 
-    static async Task<bool> AsyncMain(int repositoryId, string tagName)
+    static async Task<bool> AsyncMain(Option option)
     {
-      var canUpdate = await Shared.DownloadUpdate.HasUpdate(repositoryId, tagName);
+      var du = new DownloadUpdate(option);
+      var canUpdate = await du.HasUpdate();
       if (canUpdate)
       {
-        var files = await Shared.DownloadUpdate.Download(repositoryId);
+        var files = await du.Download();
         foreach (var file in files)
         {
           Console.WriteLine(string.Format("Downloaded: {0}", file));
