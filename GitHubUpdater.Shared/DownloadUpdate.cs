@@ -16,19 +16,21 @@ namespace GitHubUpdater.Shared
 
     public Option Option { get; private set; }
 
+    public event EventHandler<DownloadFile> DownloadStarted; 
+
     public async Task<bool> HasUpdate()
     {
       var release = await GetLatestRelease();
       return !string.Equals(Option.Version, release.TagName, StringComparison.InvariantCultureIgnoreCase);
     }
 
-    public async Task<List<string>> Download()
+    public async Task Download()
     {
       var release = await GetLatestRelease();
-      return Download(release);
+      Download(release);
     }
 
-    private List<string> Download(Release release)
+    private void Download(Release release)
     {
       var result = new List<string>();
       var assets = release.Assets;
@@ -41,7 +43,7 @@ namespace GitHubUpdater.Shared
         catch (Exception) { }
       }
       if (!assets.Any())
-        return new List<string>();
+        return;
 
       var folder = Option.OutputFolder;
       folder = Environment.ExpandEnvironmentVariables(folder);
@@ -49,23 +51,30 @@ namespace GitHubUpdater.Shared
       {
         Directory.CreateDirectory(folder);
       }
-      Parallel.ForEach(assets, (asset) =>
+      foreach (var asset in assets)
       {
         var dl = new WebClient();
-        var data = dl.DownloadData(asset.BrowserDownloadUrl);
-        var path = Path.Combine(folder, asset.Name);
-        File.WriteAllBytes(path, data);
-        result.Add(path);
-        if (Option.Unpack)
+        OnDownloadStarted(new DownloadFile(asset, dl));
+        dl.DownloadDataAsync(new Uri(asset.BrowserDownloadUrl));
+        dl.DownloadDataCompleted += (sender, args) =>
         {
-          var archive = new ZipArchive(path);
-          if (string.IsNullOrWhiteSpace(Option.UnpackFolder))
-            archive.Unpack(folder);
-          else
-            archive.Unpack(folder, Option.UnpackFolder);
-        }
-      });
-      return result;
+          DlOnDownloadDataCompleted(folder, asset.Name, args);
+        };
+      }
+    }
+
+    private void DlOnDownloadDataCompleted(string folder, string name, DownloadDataCompletedEventArgs args)
+    {
+      var path = Path.Combine(folder, name);
+      File.WriteAllBytes(path, args.Result);
+      if (Option.Unpack)
+      {
+        var archive = new ZipArchive(path);
+        if (string.IsNullOrWhiteSpace(Option.UnpackFolder))
+          archive.Unpack(folder);
+        else
+          archive.Unpack(folder, Option.UnpackFolder);
+      }
     }
 
     private Task<Release> GetLatestRelease()
@@ -77,6 +86,11 @@ namespace GitHubUpdater.Shared
     public DownloadUpdate(Option option)
     {
       this.Option = option;
+    }
+
+    protected virtual void OnDownloadStarted(DownloadFile e)
+    {
+      DownloadStarted?.Invoke(this, e);
     }
   }
 }

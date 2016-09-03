@@ -1,0 +1,32 @@
+﻿<Application x:Class="GitHubUpdater.WPF.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:GitHubUpdater.WPF"
+             xmlns:viewModel="clr-namespace:GitHubUpdater.WPF.ViewModel"
+             Startup="App_OnStartup">
+  <Application.Resources>
+    <DataTemplate DataType="{x:Type viewModel:DownloadedFileViewModel}">
+      <Grid Margin="5">
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="*"/>
+          <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <TextBlock Grid.Column="0" 
+                   Padding="5"
+                   Text="{Binding Name}"/>
+        <ProgressBar Grid.Column="1" 
+                     Padding="5"
+                     Minimum="0" Maximum="100" Value="{Binding Downloaded}"/>
+        <TextBlock Grid.Column="1" 
+                   Padding="5"
+                   TextAlignment="Center"
+                   Text="{Binding DownloadText}"
+                   ToolTip="{Binding Downloaded, StringFormat={}{0} %.}"/>
+      </Grid>
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type viewModel:DownloadViewModel}">
+      <ListView ItemsSource="{Binding DownloadedFiles}" HorizontalContentAlignment="Stretch"/>
+    </DataTemplate>
+  </Application.Resources>
+</Application>

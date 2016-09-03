@@ -58,6 +58,7 @@
     </Compile>
     <Compile Include="Archive\IArchive.cs" />
     <Compile Include="Archive\ZipArchive.cs" />
+    <Compile Include="DownloadFile.cs" />
     <Compile Include="DownloadUpdate.cs" />
     <Compile Include="Option.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

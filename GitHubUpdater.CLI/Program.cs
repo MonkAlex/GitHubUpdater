@@ -25,11 +25,11 @@ namespace GitHubUpdater.CLI
       var canUpdate = await du.HasUpdate();
       if (canUpdate)
       {
-        var files = await du.Download();
-        foreach (var file in files)
-        {
-          Console.WriteLine(string.Format("Downloaded: {0}", file));
-        }
+        //var files = await du.Download();
+        //foreach (var file in files)
+        //{
+        //  Console.WriteLine(string.Format("Downloaded: {0}", file));
+        //}
       }
       return true;
     }
