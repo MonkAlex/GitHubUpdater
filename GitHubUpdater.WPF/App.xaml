@@ -10,6 +10,7 @@
         <Grid.ColumnDefinitions>
           <ColumnDefinition Width="*"/>
           <ColumnDefinition Width="*"/>
+          <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
         <TextBlock Grid.Column="0" 
                    Padding="5"
@@ -19,9 +20,13 @@
                      Minimum="0" Maximum="100" Value="{Binding Downloaded}"/>
         <TextBlock Grid.Column="1" 
                    Padding="5"
-                   TextAlignment="Center"
                    Text="{Binding DownloadText}"
-                   ToolTip="{Binding Downloaded, StringFormat={}{0} %.}"/>
+                   TextAlignment="Center"
+                   ToolTip="{Binding Downloaded, StringFormat={}И то хлеб {0} %}"/>
+        <Button Grid.Column="2"
+                Padding="5"
+                Command="{Binding Download}"
+                Content="DL"/>
       </Grid>
     </DataTemplate>
 

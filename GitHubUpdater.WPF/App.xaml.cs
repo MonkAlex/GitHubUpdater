@@ -18,29 +18,18 @@ namespace GitHubUpdater.WPF
   {
     private DownloadViewModel downloadViewModel = new DownloadViewModel();
 
-    private void App_OnStartup(object sender, StartupEventArgs e)
+    private async void App_OnStartup(object sender, StartupEventArgs e)
     {
       var option = Option.CreateFromArgs();
       if (option.HasError)
         return;
 
       var download = new DownloadUpdate(option);
-      download.DownloadStarted += DownloadOnDownloadStarted;
-      new MainWindow() { DataContext = downloadViewModel }.Show();
-      Task.Run(() => download.Download());
-    }
-
-    private void DownloadOnDownloadStarted(object sender, DownloadFile f)
-    {
-      var fileModel = new DownloadedFileViewModel(f.Uri);
-      fileModel.Name = f.Name;
-      f.WebClient.DownloadProgressChanged += (o, args) =>
+      foreach (var file in await download.GetFiles())
       {
-        fileModel.Downloaded = args.ProgressPercentage;
-        fileModel.DownloadText = string.Format("{0} / {1}", args.BytesReceived, args.TotalBytesToReceive);
-      };
-
-      Current.Dispatcher.InvokeAsync(() => downloadViewModel.DownloadedFiles.Add(fileModel));
+        downloadViewModel.DownloadedFiles.Add(new DownloadedFileViewModel(file));
+      }
+      new MainWindow() { DataContext = downloadViewModel }.Show();
     }
   }
 }

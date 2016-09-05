@@ -12,38 +12,35 @@ namespace GitHubUpdater.Shared
 {
   public class DownloadUpdate
   {
-    private static readonly string WorkFolder = AppDomain.CurrentDomain.BaseDirectory;
-
-    public Option Option { get; private set; }
-
-    public event EventHandler<DownloadFile> DownloadStarted; 
+    public Option Option { get; }
 
     public async Task<bool> HasUpdate()
     {
-      var release = await GetLatestRelease();
+      var release = await GetLatestRelease().ConfigureAwait(false);
       return !string.Equals(Option.Version, release.TagName, StringComparison.InvariantCultureIgnoreCase);
     }
 
-    public async Task Download()
+    public async Task<IQueryable<DownloadFile>> GetFiles()
     {
-      var release = await GetLatestRelease();
-      Download(release);
+      var release = await GetLatestRelease().ConfigureAwait(false);
+      return GetFiles(release);
     }
 
-    private void Download(Release release)
+    private IQueryable<DownloadFile> GetFiles(Release release)
     {
-      var result = new List<string>();
-      var assets = release.Assets;
+      var assets = release.Assets.AsQueryable();
       if (!string.IsNullOrWhiteSpace(Option.DownloadMask))
       {
         try
         {
-          assets = assets.Where(a => Regex.IsMatch(a.Name, Option.DownloadMask, RegexOptions.IgnoreCase)).ToList();
+          var regex = new Regex(Option.DownloadMask, RegexOptions.IgnoreCase);
+          assets = assets.Where(a => regex.IsMatch(a.Name));
         }
         catch (Exception) { }
       }
-      if (!assets.Any())
-        return;
+
+      return assets.Select(a => new DownloadFile(a));
+      /*
 
       var folder = Option.OutputFolder;
       folder = Environment.ExpandEnvironmentVariables(folder);
@@ -61,6 +58,7 @@ namespace GitHubUpdater.Shared
           DlOnDownloadDataCompleted(folder, asset.Name, args);
         };
       }
+      */
     }
 
     private void DlOnDownloadDataCompleted(string folder, string name, DownloadDataCompletedEventArgs args)
@@ -86,11 +84,6 @@ namespace GitHubUpdater.Shared
     public DownloadUpdate(Option option)
     {
       this.Option = option;
-    }
-
-    protected virtual void OnDownloadStarted(DownloadFile e)
-    {
-      DownloadStarted?.Invoke(this, e);
     }
   }
 }

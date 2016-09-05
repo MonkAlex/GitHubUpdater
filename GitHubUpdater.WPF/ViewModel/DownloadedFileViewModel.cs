@@ -1,13 +1,17 @@
 ﻿using System;
+using System.Windows.Input;
+using GitHubUpdater.Shared;
+using GitHubUpdater.WPF.Command;
 
 namespace GitHubUpdater.WPF.ViewModel
 {
   public class DownloadedFileViewModel : BaseViewModel
   {
     private double downloaded;
-    private string name;
+    private DownloadFile file;
     private string downloadText;
-    public Uri Uri { get; }
+
+    public Uri Uri { get { return file.Uri; } }
 
     public double Downloaded
     {
@@ -15,16 +19,6 @@ namespace GitHubUpdater.WPF.ViewModel
       set
       {
         downloaded = value;
-        OnPropertyChanged();
-      }
-    }
-
-    public string Name
-    {
-      get { return name; }
-      set
-      {
-        name = value;
         OnPropertyChanged();
       }
     }
@@ -39,13 +33,14 @@ namespace GitHubUpdater.WPF.ViewModel
       }
     }
 
-    public DownloadedFileViewModel(Uri uri)
-    {
-      this.Uri = uri;
-    }
+    public string Name { get { return file.Name; } }
 
-    public DownloadedFileViewModel(string uri) : this(new Uri(uri))
+    public ICommand Download { get; }
+
+    public DownloadedFileViewModel(DownloadFile file)
     {
+      this.file = file;
+      this.Download = new DownloadFileCommand(this, file);
     }
   }
 }
