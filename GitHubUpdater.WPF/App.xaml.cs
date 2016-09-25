@@ -27,7 +27,7 @@ namespace GitHubUpdater.WPF
       var download = new DownloadUpdate(option);
       foreach (var file in await download.GetFiles())
       {
-        downloadViewModel.DownloadedFiles.Add(new DownloadedFileViewModel(file, option.OutputFolder));
+        downloadViewModel.DownloadedFiles.Add(new DownloadedFileViewModel(file, option.OutputFolder, option.UnpackFolder));
       }
       new MainWindow() { DataContext = downloadViewModel }.Show();
     }

@@ -56,6 +56,7 @@
     </ApplicationDefinition>
     <Compile Include="Command\BaseCommand.cs" />
     <Compile Include="Command\DownloadFileCommand.cs" />
+    <Compile Include="Command\UnpackCommand.cs" />
     <Compile Include="Helper.cs" />
     <Compile Include="ViewModel\BaseViewModel.cs" />
     <Compile Include="ViewModel\DownloadedFileViewModel.cs" />

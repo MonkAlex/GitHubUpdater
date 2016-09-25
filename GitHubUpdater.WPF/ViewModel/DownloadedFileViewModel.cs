@@ -39,6 +39,8 @@ namespace GitHubUpdater.WPF.ViewModel
 
     public ICommand Download { get; }
 
+    public ICommand Unpack { get; }
+
     public string Target
     {
       get { return target; }
@@ -49,11 +51,18 @@ namespace GitHubUpdater.WPF.ViewModel
       }
     }
 
-    public DownloadedFileViewModel(DownloadFile file, string targetFolder)
+    public DownloadedFileViewModel(DownloadFile file, string targetFolder, string unpackFolder)
     {
       this.file = file;
       this.Download = new DownloadFileCommand(this, file);
+      this.Unpack = new UnpackCommand(this);
       this.Target = Path.Combine(targetFolder, file.Name);
+      this.TargetFolder = targetFolder;
+      this.Subfolder = unpackFolder;
     }
+
+    public string TargetFolder { get; set; }
+
+    public string Subfolder { get; set; }
   }
 }

@@ -11,6 +11,7 @@
           <ColumnDefinition Width="*"/>
           <ColumnDefinition Width="*"/>
           <ColumnDefinition Width="Auto"/>
+          <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
         <TextBlock Grid.Column="0" 
                    Padding="5"
@@ -27,6 +28,10 @@
                 Padding="5"
                 Command="{Binding Download}"
                 Content="DL"/>
+        <Button Grid.Column="3"
+                Padding="5"
+                Command="{Binding Unpack}"
+                Content="Un"/>
       </Grid>
     </DataTemplate>
 
