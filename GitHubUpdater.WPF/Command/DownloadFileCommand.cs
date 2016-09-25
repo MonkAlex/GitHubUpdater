@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Net;
 using GitHubUpdater.Shared;
 using GitHubUpdater.WPF.ViewModel;
@@ -15,6 +16,10 @@ namespace GitHubUpdater.WPF.Command
       base.Execute(parameter);
 
       var content = await file.Download(new Progress<DownloadProgressChangedEventArgs>(Handler));
+      using (var targetFile = File.OpenWrite(model.Target))
+      {
+        await targetFile.WriteAsync(content, 0, content.Length);
+      }
     }
 
     private void Handler(DownloadProgressChangedEventArgs args)
