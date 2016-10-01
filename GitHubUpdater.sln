@@ -19,6 +19,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GitHubUpdater.WPF", "GitHubUpdater.WPF\GitHubUpdater.WPF.csproj", "{768C2092-6670-48EF-982B-948F1451544A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GitHubUpdater.Launcher", "GitHubUpdater.Launcher\GitHubUpdater.Launcher.csproj", "{8399763C-43D3-4DD4-B91C-379E6D7D0561}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -37,6 +39,10 @@ Global
 		{768C2092-6670-48EF-982B-948F1451544A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{768C2092-6670-48EF-982B-948F1451544A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{768C2092-6670-48EF-982B-948F1451544A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8399763C-43D3-4DD4-B91C-379E6D7D0561}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8399763C-43D3-4DD4-B91C-379E6D7D0561}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8399763C-43D3-4DD4-B91C-379E6D7D0561}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8399763C-43D3-4DD4-B91C-379E6D7D0561}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
