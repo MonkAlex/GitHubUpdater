@@ -68,7 +68,8 @@
     </PostBuildEventDependsOn>
     <PostBuildEvent>
       md "$(TargetDir)\@(VersionNumber)"
-      xcopy /y /r /e "$(ProjectDir)\..\GitHubUpdater.WPF\bin\$(ConfigurationName)" "$(TargetDir)\@(VersionNumber)"</PostBuildEvent>
+      xcopy /y /r /e "$(ProjectDir)\..\GitHubUpdater.WPF\bin\$(ConfigurationName)" "$(TargetDir)\@(VersionNumber)"
+    </PostBuildEvent>
   </PropertyGroup>
   <Target Name="BeforeBuild">
   </Target>
