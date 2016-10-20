@@ -52,7 +52,8 @@ namespace GitHubUpdater.Launcher
 
       if (canBeStarted.Length == 1)
       {
-        Process.Start(canBeStarted[0], string.Join(" ", args));
+        var process = Process.Start(canBeStarted[0], string.Join(" ", args));
+        process.WaitForInputIdle();
         Close(ExitCodes.None);
       }
 

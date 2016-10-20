@@ -22,7 +22,13 @@ namespace GitHubUpdater.WPF
     {
       var option = Option.CreateFromArgs();
       if (option.HasError)
-        return;
+      {
+        MessageBox.Show(string.Join(Environment.NewLine, option.ParserState.Errors.Select(er =>
+          string.Format("Property {0} ({1}) is required {2}, is bad format {3}, MutualExclusiveness {4}.",
+            er.BadOption.ShortName, er.BadOption.LongName, er.ViolatesRequired,
+            er.ViolatesFormat, er.ViolatesMutualExclusiveness))));
+        Environment.Exit(-1);
+      }
 
       var download = new DownloadUpdate(option);
       foreach (var file in await download.GetFiles())
