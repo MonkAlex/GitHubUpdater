@@ -4,6 +4,7 @@ using System.Configuration;
 using System.Data;
 using System.Linq;
 using System.Net;
+using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using GitHubUpdater.Shared;
@@ -20,13 +21,33 @@ namespace GitHubUpdater.WPF
 
     private async void App_OnStartup(object sender, StartupEventArgs e)
     {
+      var mw = new MainWindow();
+
       var option = Option.CreateFromArgs();
       if (option.HasError)
       {
-        MessageBox.Show(string.Join(Environment.NewLine, option.ParserState.Errors.Select(er =>
-          string.Format("Property {0} ({1}) is required {2}, is bad format {3}, MutualExclusiveness {4}.",
-            er.BadOption.ShortName, er.BadOption.LongName, er.ViolatesRequired,
-            er.ViolatesFormat, er.ViolatesMutualExclusiveness))));
+        var text = new StringBuilder();
+        foreach (var error in option.ParserState.Errors)
+        {
+          if (error.BadOption.ShortName.HasValue)
+          {
+            text.Append('-');
+            text.Append(error.BadOption.ShortName);
+          }
+          if (!string.IsNullOrWhiteSpace(error.BadOption.LongName))
+          {
+            text.Append("--");
+            text.Append(error.BadOption.LongName);
+          }
+          if (error.ViolatesRequired)
+            text.Append(" is requred");
+          if (error.ViolatesFormat)
+            text.Append(" bad formated");
+          if (error.ViolatesMutualExclusiveness)
+            text.Append(" is violates mutual exclusiveness");
+          text.AppendLine();
+        }
+        MessageBox.Show(mw, text.ToString(), "Command not parsed", MessageBoxButton.OK, MessageBoxImage.Error);
         Environment.Exit(-1);
       }
 
@@ -35,7 +56,8 @@ namespace GitHubUpdater.WPF
       {
         downloadViewModel.DownloadedFiles.Add(new DownloadedFileViewModel(file, option.OutputFolder, option.UnpackFolder));
       }
-      new MainWindow() { DataContext = downloadViewModel }.Show();
+      mw.DataContext = downloadViewModel;
+      mw.Show();
     }
   }
 }
