@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using GitHubUpdater.Shared;
+using GitHubUpdater.WPF.View;
 using GitHubUpdater.WPF.ViewModel;
 
 namespace GitHubUpdater.WPF
@@ -17,11 +18,9 @@ namespace GitHubUpdater.WPF
   /// </summary>
   public partial class App : Application
   {
-    private DownloadViewModel downloadViewModel = new DownloadViewModel();
-
     private async void App_OnStartup(object sender, StartupEventArgs e)
     {
-      var mw = new MainWindow();
+      var window = new Update();
 
       var option = Option.CreateFromArgs();
       if (option.HasError)
@@ -47,17 +46,20 @@ namespace GitHubUpdater.WPF
             text.Append(" is violates mutual exclusiveness");
           text.AppendLine();
         }
-        MessageBox.Show(mw, text.ToString(), "Command not parsed", MessageBoxButton.OK, MessageBoxImage.Error);
+        MessageBox.Show(window, text.ToString(), "Command not parsed", MessageBoxButton.OK, MessageBoxImage.Error);
         Environment.Exit(-1);
       }
-
+/*
       var download = new DownloadUpdate(option);
       foreach (var file in await download.GetFiles())
       {
         downloadViewModel.DownloadedFiles.Add(new DownloadedFileViewModel(file, option.OutputFolder, option.UnpackFolder));
       }
-      mw.DataContext = downloadViewModel;
-      mw.Show();
+      */
+
+      var viewModel = new UpdateViewModel(option);
+      window.DataContext = viewModel;
+      window.Show();
     }
   }
 }

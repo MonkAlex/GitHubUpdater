@@ -64,13 +64,15 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Command\BaseCommand.cs" />
-    <Compile Include="Command\DownloadFileCommand.cs" />
-    <Compile Include="Command\UnpackCommand.cs" />
+    <Compile Include="Command\GetRepositoryFilesCommand.cs" />
     <Compile Include="Helper.cs" />
     <Compile Include="ViewModel\BaseViewModel.cs" />
     <Compile Include="ViewModel\DownloadedFileViewModel.cs" />
-    <Compile Include="ViewModel\DownloadViewModel.cs" />
-    <Compile Include="ViewModel\PageViewModel.cs" />
+    <Compile Include="ViewModel\ProcessViewModel.cs" />
+    <Compile Include="ViewModel\UpdateViewModel.cs" />
+    <Compile Include="View\Update.xaml.cs">
+      <DependentUpon>Update.xaml</DependentUpon>
+    </Compile>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -86,6 +88,10 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="View\Update.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs">

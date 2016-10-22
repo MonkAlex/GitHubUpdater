@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Net;
 using System.Threading.Tasks;
 using Octokit;
@@ -13,17 +14,31 @@ namespace GitHubUpdater.Shared
 
     public int Size { get; }
 
-    public async Task<byte[]> Download()
+    public async Task<bool> Download(string target)
     {
-      return await Download(null).ConfigureAwait(false);
+      return await Download(null, target).ConfigureAwait(false);
     }
 
-    public async Task<byte[]> Download(IProgress<DownloadProgressChangedEventArgs> progress)
+    public async Task<bool> Download(IProgress<DownloadProgressChangedEventArgs> progress, string target)
     {
-      var webClient = new WebClient();
-      if (progress != null)
-        webClient.DownloadProgressChanged += (sender, args) => progress.Report(args);
-      return await webClient.DownloadDataTaskAsync(this.Uri).ConfigureAwait(false);
+      try
+      {
+        var webClient = new WebClient();
+        if (progress != null)
+          webClient.DownloadProgressChanged += (sender, args) => progress.Report(args);
+        var content = await webClient.DownloadDataTaskAsync(this.Uri).ConfigureAwait(false);
+
+        using (var targetFile = File.OpenWrite(target))
+        {
+          await targetFile.WriteAsync(content, 0, content.Length);
+        }
+      }
+      catch (Exception e)
+      {
+        return false;
+      }
+
+      return true;
     }
 
     public DownloadFile(ReleaseAsset asset)

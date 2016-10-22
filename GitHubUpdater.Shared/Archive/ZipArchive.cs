@@ -63,19 +63,34 @@ namespace GitHubUpdater.Shared.Archive
         {
           using (var destination = new MemoryStream())
           {
-            using (Stream stream = entry.Open())
-              stream.CopyTo(destination);
-            if (destination.Length != entry.Length)
-              return false;
+            try
+            {
+              using (Stream stream = entry.Open())
+                stream.CopyTo(destination);
+              if (destination.Length != entry.Length)
+                return false;
+            }
+            catch (Exception ex)
+            {
+              OnExceptionHandler(ex);
+            }
           }
         }
       }
       return true;
     }
 
+    public event EventHandler<Exception> ExceptionHandler;
+
     public ZipArchive(string file)
     {
       this.File = new FileInfo(file);
+    }
+
+    protected virtual void OnExceptionHandler(Exception e)
+    {
+#warning Надо явный признак, обработано исключение или нет. Чтобы падать без обработчиков.
+      ExceptionHandler?.Invoke(this, e);
     }
   }
 }
