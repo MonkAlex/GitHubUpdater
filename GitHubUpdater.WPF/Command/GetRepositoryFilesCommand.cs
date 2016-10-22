@@ -25,11 +25,11 @@ namespace GitHubUpdater.WPF.Command
       {
         model.DownloadedFiles.Add(new DownloadedFileViewModel(file, model.Option.OutputFolder, model.Option.UnpackFolder));
       }
-
+/*
       var taskToLoad = model.DownloadedFiles
         .Select(f => f.Download(new Progress<DownloadProgressChangedEventArgs>(f.Handler)));
       await Task.WhenAll(taskToLoad);
-
+      */
       foreach (var file in model.DownloadedFiles)
       {
         if (File.Exists(file.Target))

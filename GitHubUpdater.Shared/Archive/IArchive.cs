@@ -28,10 +28,5 @@ namespace GitHubUpdater.Shared.Archive
     /// </summary>
     /// <returns>True, if archive valid.</returns>
     bool Test();
-
-    /// <summary>
-    /// Get application handler with exception to fix him.
-    /// </summary>
-    event EventHandler<Exception> ExceptionHandler;
   }
 }

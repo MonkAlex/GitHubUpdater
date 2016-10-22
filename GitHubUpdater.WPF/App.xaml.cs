@@ -49,17 +49,25 @@ namespace GitHubUpdater.WPF
         MessageBox.Show(window, text.ToString(), "Command not parsed", MessageBoxButton.OK, MessageBoxImage.Error);
         Environment.Exit(-1);
       }
-/*
-      var download = new DownloadUpdate(option);
-      foreach (var file in await download.GetFiles())
-      {
-        downloadViewModel.DownloadedFiles.Add(new DownloadedFileViewModel(file, option.OutputFolder, option.UnpackFolder));
-      }
-      */
+      /*
+            var download = new DownloadUpdate(option);
+            foreach (var file in await download.GetFiles())
+            {
+              downloadViewModel.DownloadedFiles.Add(new DownloadedFileViewModel(file, option.OutputFolder, option.UnpackFolder));
+            }
+            */
+
+      ExceptionHandler.Handler += ExceptionHandlerOnHandler;
 
       var viewModel = new UpdateViewModel(option);
       window.DataContext = viewModel;
       window.Show();
+    }
+
+    private void ExceptionHandlerOnHandler(object sender, ExceptionEventArgs args)
+    {
+      var button = AbortRetryIgnore.ShowDialog(Current.Windows.OfType<Window>().LastOrDefault(), args.Exception.Message);
+      args.Handled = button;
     }
   }
 }

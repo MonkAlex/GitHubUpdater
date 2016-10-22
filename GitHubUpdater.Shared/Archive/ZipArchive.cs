@@ -8,7 +8,7 @@ namespace GitHubUpdater.Shared.Archive
 {
   public class ZipArchive : IArchive
   {
-    public string[] Extension { get { return new[] {".zip", ".cbz"}; } }
+    public string[] Extension { get { return new[] { ".zip", ".cbz" }; } }
     public FileInfo File { get; set; }
 
     protected bool IsValud()
@@ -36,18 +36,21 @@ namespace GitHubUpdater.Shared.Archive
       {
         foreach (var entry in zipFile.Entries.Where(e => e.FullName.StartsWith(subfolder)))
         {
-          var fixedName = Regex.Replace(entry.FullName, string.Format("^{0}//*", subfolder), string.Empty, RegexOptions.IgnoreCase);
-          var fullPath = Path.Combine(folder, fixedName);
-          if (Path.GetFileName(fullPath).Length == 0)
+          ExceptionHandler.TryExecute(() =>
           {
-            if (entry.Length == 0L)
-            Directory.CreateDirectory(fullPath);
-          }
-          else
-          {
-            Directory.CreateDirectory(Path.GetDirectoryName(fullPath));
-            entry.ExtractToFile(fullPath, true);
-          }
+            var fixedName = Regex.Replace(entry.FullName, string.Format("^{0}//*", subfolder), string.Empty, RegexOptions.IgnoreCase);
+            var fullPath = Path.Combine(folder, fixedName);
+            if (Path.GetFileName(fullPath).Length == 0)
+            {
+              if (entry.Length == 0L)
+                Directory.CreateDirectory(fullPath);
+            }
+            else
+            {
+              Directory.CreateDirectory(Path.GetDirectoryName(fullPath));
+              entry.ExtractToFile(fullPath, true);
+            }
+          });
         }
       }
     }
@@ -61,36 +64,25 @@ namespace GitHubUpdater.Shared.Archive
       {
         foreach (var entry in zipFile.Entries)
         {
-          using (var destination = new MemoryStream())
+          var tested = ExceptionHandler<bool>.TryExecute(() =>
           {
-            try
+            using (var destination = new MemoryStream())
             {
               using (Stream stream = entry.Open())
                 stream.CopyTo(destination);
-              if (destination.Length != entry.Length)
-                return false;
+              return destination.Length == entry.Length;
             }
-            catch (Exception ex)
-            {
-              OnExceptionHandler(ex);
-            }
-          }
+          }, false);
+          if (!tested)
+            return false;
         }
       }
       return true;
     }
 
-    public event EventHandler<Exception> ExceptionHandler;
-
     public ZipArchive(string file)
     {
       this.File = new FileInfo(file);
-    }
-
-    protected virtual void OnExceptionHandler(Exception e)
-    {
-#warning Надо явный признак, обработано исключение или нет. Чтобы падать без обработчиков.
-      ExceptionHandler?.Invoke(this, e);
     }
   }
 }

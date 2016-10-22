@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:GitHubUpdater.WPF"
              xmlns:viewModel="clr-namespace:GitHubUpdater.WPF.ViewModel"
+             ShutdownMode="OnLastWindowClose"
              Startup="App_OnStartup">
   <Application.Resources>
     <DataTemplate DataType="{x:Type viewModel:DownloadedFileViewModel}">
