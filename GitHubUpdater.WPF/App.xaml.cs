@@ -18,7 +18,7 @@ namespace GitHubUpdater.WPF
   /// </summary>
   public partial class App : Application
   {
-    private async void App_OnStartup(object sender, StartupEventArgs e)
+    private void App_OnStartup(object sender, StartupEventArgs e)
     {
       var window = new Update();
 

@@ -44,43 +44,42 @@ namespace GitHubUpdater.Shared
       }
       return e.Handled;
     }
-
-    public static void OnAbort(Exception ex)
-    {
-      ExceptionDispatchInfo.Capture(ex).Throw();
-    }
   }
 
   public static class ExceptionHandler<T>
   {
     public static T TryExecute(Func<T> action, T whenFailed)
     {
-      try
+      ExceptionHandle? handled = ExceptionHandle.Retry;
+      while (handled == ExceptionHandle.Retry)
       {
-        return action();
-      }
-      catch (Exception ex)
-      {
-        var handled = ExceptionHandler.OnHandler(new ExceptionEventArgs(ex));
-        if (handled.HasValue)
+        try
         {
-          switch (handled.Value)
-          {
-            case ExceptionHandle.Abort:
-              ExceptionHandler.OnAbort(ex);
-              break;
-            case ExceptionHandle.Retry:
-              return TryExecute(action, whenFailed);
-              break;
-            case ExceptionHandle.Ignore:
-              break;
-            default:
-              throw new ArgumentOutOfRangeException();
-          }
+          return action();
         }
-        else
+        catch (Exception ex)
         {
-          throw;
+          handled = ExceptionHandler.OnHandler(new ExceptionEventArgs(ex));
+          if (handled.HasValue)
+          {
+            switch (handled.Value)
+            {
+              case ExceptionHandle.Abort:
+                throw;
+                break;
+              case ExceptionHandle.Retry:
+                break;
+              case ExceptionHandle.Ignore:
+                return whenFailed;
+                break;
+              default:
+                throw new ArgumentOutOfRangeException();
+            }
+          }
+          else
+          {
+            throw;
+          }
         }
       }
       return whenFailed;

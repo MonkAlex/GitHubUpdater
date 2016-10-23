@@ -4,13 +4,13 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:GitHubUpdater.WPF.View"
-        WindowStyle="None"
+        WindowStyle="ThreeDBorderWindow"
         WindowStartupLocation="CenterOwner"
         ShowInTaskbar="False"
-        ResizeMode="NoResize"
+        ResizeMode="CanResizeWithGrip"
         Title="Error"
         mc:Ignorable="d"
-        Height="100" Width="300">
+        Height="200" Width="320">
   <Grid>
     <Grid.RowDefinitions>
       <RowDefinition Height="*"/>
