@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -23,15 +24,16 @@ namespace GitHubUpdater.WPF.Command
       var download = new DownloadUpdate(model.Option);
       foreach (var file in await download.GetFiles())
       {
-        model.DownloadedFiles.Add(new DownloadedFileViewModel(file, model.Option.OutputFolder, model.Option.UnpackFolder));
+        var viewModel = new DownloadedFileViewModel(file, model.Option.OutputFolder, model.Option.UnpackFolder);
+        model.DownloadedFiles.Add(viewModel);
       }
-      /*
+
       var taskToLoad = model.DownloadedFiles
-        .Select(f => f.Download(new Progress<DownloadProgressChangedEventArgs>(f.DownloadingHandler)));
+        .Select(f => f.Download(new Progress<DownloadProgress>(f.DownloadingHandler)));
       await Task.WhenAll(taskToLoad);
-      */
+      
       var taskToUnpack = model.DownloadedFiles
-        .Select(f => f.Unpack(new Progress<IProcess>()));
+        .Select(f => f.Unpack(new Progress<UnpackProgress>(f.UnpackingHandler)));
       await Task.WhenAll(taskToUnpack);
 
       model.ProgressState = ProgressState.None;

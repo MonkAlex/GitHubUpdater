@@ -35,6 +35,11 @@ namespace GitHubUpdater.Shared.Archive
 
     public bool Unpack(string folder, string subfolder)
     {
+      return Unpack(folder, subfolder, null);
+    }
+
+    public bool Unpack(string folder, string subfolder, IProgress<UnpackProgress> progress)
+    {
       if (!IsValud())
         return false;
 
@@ -45,6 +50,13 @@ namespace GitHubUpdater.Shared.Archive
           entries = entries.Where(e => e.FullName.StartsWith(subfolder)).ToList();
         foreach (var entry in entries)
         {
+          if (progress != null)
+          {
+            var unpack = new UnpackProgress();
+            unpack.ProgressPercentage = (int)(entries.IndexOf(entry) * 100.00 / entries.Count);
+            unpack.LastFile = entry.Name;
+            progress.Report(unpack);
+          }
           ExceptionHandler.TryExecute(() =>
           {
             var fixedName = Regex.Replace(entry.FullName, string.Format("^{0}//*", subfolder), string.Empty,

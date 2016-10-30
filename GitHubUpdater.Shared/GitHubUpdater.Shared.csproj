@@ -64,6 +64,7 @@
     <Compile Include="DownloadFile.cs" />
     <Compile Include="DownloadUpdate.cs" />
     <Compile Include="ExceptionHandler.cs" />
+    <Compile Include="IProgress.cs" />
     <Compile Include="Option.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

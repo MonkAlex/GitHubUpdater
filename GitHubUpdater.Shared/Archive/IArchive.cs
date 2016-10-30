@@ -27,6 +27,15 @@ namespace GitHubUpdater.Shared.Archive
     bool Unpack(string folder, string subfolder);
 
     /// <summary>
+    /// Unpack to folder.
+    /// </summary>
+    /// <param name="folder">Target folder.</param>
+    /// <param name="subfolder">Folder in archive for unpack.</param>
+    /// <param name="progress">Callback for progress.</param>
+    /// <returns>True, if unpack completed.</returns>
+    bool Unpack(string folder, string subfolder, IProgress<UnpackProgress> progress);
+
+    /// <summary>
     /// Test archive.
     /// </summary>
     /// <returns>True, if archive valid.</returns>

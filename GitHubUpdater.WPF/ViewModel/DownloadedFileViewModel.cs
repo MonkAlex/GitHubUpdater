@@ -51,19 +51,25 @@ namespace GitHubUpdater.WPF.ViewModel
       }
     }
 
-    public async Task<bool> Download(IProgress<DownloadProgressChangedEventArgs> args)
+    public async Task<bool> Download(IProgress<DownloadProgress> args)
     {
       return await file.Download(args, Target);
     }
 
-    public void DownloadingHandler(DownloadProgressChangedEventArgs args)
+    public void DownloadingHandler(DownloadProgress args)
     {
       Downloaded = args.ProgressPercentage / 100.00;
       DownloadText = string.Format("{0} / {1}",
         args.BytesReceived.HumanizeByteSize(), args.TotalBytesToReceive.HumanizeByteSize());
     }
 
-    public async Task<bool> Unpack(IProgress<IProcess> args)
+    public void UnpackingHandler(UnpackProgress args)
+    {
+      Downloaded = args.ProgressPercentage / 100.00;
+      DownloadText = string.Format("{0}", args.LastFile);
+    }
+
+    public async Task<bool> Unpack(IProgress<UnpackProgress> args)
     {
       if (File.Exists(Target))
       {
@@ -72,13 +78,12 @@ namespace GitHubUpdater.WPF.ViewModel
         {
           if (type.Test())
           {
-#warning Надо оповещение о распаковке
-            return await Task.Run(() => type.Unpack(TargetFolder, Subfolder));
+            return await Task.Run(() => type.Unpack(TargetFolder, Subfolder, args));
           }
         }
       }
       return false;
-    } 
+    }
 
     public DownloadedFileViewModel(DownloadFile file, string targetFolder, string unpackFolder)
     {
