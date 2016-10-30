@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Reflection.Emit;
+using System.Threading.Tasks;
 
 namespace GitHubUpdater.Shared.Archive
 {
@@ -14,14 +15,16 @@ namespace GitHubUpdater.Shared.Archive
     /// Unpack to folder.
     /// </summary>
     /// <param name="folder">Target folder.</param>
-    void Unpack(string folder);
+    /// <returns>True, if unpack completed.</returns>
+    bool Unpack(string folder);
 
     /// <summary>
     /// Unpack to folder.
     /// </summary>
     /// <param name="folder">Target folder.</param>
     /// <param name="subfolder">Folder in archive for unpack.</param>
-    void Unpack(string folder, string subfolder);
+    /// <returns>True, if unpack completed.</returns>
+    bool Unpack(string folder, string subfolder);
 
     /// <summary>
     /// Test archive.

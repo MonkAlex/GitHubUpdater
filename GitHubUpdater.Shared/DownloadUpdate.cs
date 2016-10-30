@@ -40,39 +40,6 @@ namespace GitHubUpdater.Shared
       }
 
       return assets.Select(a => new DownloadFile(a));
-      /*
-
-      var folder = Option.OutputFolder;
-      folder = Environment.ExpandEnvironmentVariables(folder);
-      if (!Directory.Exists(folder))
-      {
-        Directory.CreateDirectory(folder);
-      }
-      foreach (var asset in assets)
-      {
-        var dl = new WebClient();
-        OnDownloadStarted(new DownloadFile(asset, dl));
-        dl.DownloadDataAsync(new Uri(asset.BrowserDownloadUrl));
-        dl.DownloadDataCompleted += (sender, args) =>
-        {
-          DlOnDownloadDataCompleted(folder, asset.Name, args);
-        };
-      }
-      */
-    }
-
-    private void DlOnDownloadDataCompleted(string folder, string name, DownloadDataCompletedEventArgs args)
-    {
-      var path = Path.Combine(folder, name);
-      File.WriteAllBytes(path, args.Result);
-      if (Option.Unpack)
-      {
-        var archive = new ZipArchive(path);
-        if (string.IsNullOrWhiteSpace(Option.UnpackFolder))
-          archive.Unpack(folder);
-        else
-          archive.Unpack(folder, Option.UnpackFolder);
-      }
     }
 
     private Task<Release> GetLatestRelease()

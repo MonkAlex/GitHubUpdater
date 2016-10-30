@@ -66,8 +66,11 @@ namespace GitHubUpdater.WPF
 
     private void ExceptionHandlerOnHandler(object sender, ExceptionEventArgs args)
     {
-      var button = AbortRetryIgnore.ShowDialog(Current.Windows.OfType<Window>().LastOrDefault(), args.Exception.Message);
-      args.Handled = button;
+      Current.Dispatcher.Invoke(() =>
+      {
+        var button = AbortRetryIgnore.ShowDialog(Current.Windows.OfType<Window>().LastOrDefault(), args.Exception.Message);
+        args.Handled = button;
+      });
     }
   }
 }

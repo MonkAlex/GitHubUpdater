@@ -25,27 +25,14 @@ namespace GitHubUpdater.WPF.Command
       {
         model.DownloadedFiles.Add(new DownloadedFileViewModel(file, model.Option.OutputFolder, model.Option.UnpackFolder));
       }
-/*
+      /*
       var taskToLoad = model.DownloadedFiles
-        .Select(f => f.Download(new Progress<DownloadProgressChangedEventArgs>(f.Handler)));
+        .Select(f => f.Download(new Progress<DownloadProgressChangedEventArgs>(f.DownloadingHandler)));
       await Task.WhenAll(taskToLoad);
       */
-      foreach (var file in model.DownloadedFiles)
-      {
-        if (File.Exists(file.Target))
-        {
-          var ext = Path.GetExtension(file.Target);
-          foreach (var type in Generic.CreateAllTypes<IArchive>(file.Target).Where(t => t.Extension.Contains(ext)))
-          {
-            if (type.Test())
-            {
-#warning Надо оповещение о распаковке
-              type.Unpack(file.TargetFolder, file.Subfolder);
-              break;
-            }
-          }
-        }
-      }
+      var taskToUnpack = model.DownloadedFiles
+        .Select(f => f.Unpack(new Progress<IProcess>()));
+      await Task.WhenAll(taskToUnpack);
 
       model.ProgressState = ProgressState.None;
       model.State = ConvertState.Completed;

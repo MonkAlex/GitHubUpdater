@@ -3,6 +3,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 
 namespace GitHubUpdater.Shared.Archive
 {
@@ -16,29 +17,38 @@ namespace GitHubUpdater.Shared.Archive
       return File.Exists && Extension.Contains(File.Extension);
     }
 
-    public void Unpack(string folder)
+    public bool Unpack(string folder)
     {
       if (!IsValud())
-        return;
+        return false;
 
-      using (var zipFile = ZipFile.OpenRead(File.FullName))
+      ExceptionHandler.TryExecute(() =>
       {
-        zipFile.ExtractToDirectory(folder);
-      }
+        using (var zipFile = ZipFile.OpenRead(File.FullName))
+        {
+          zipFile.ExtractToDirectory(folder);
+        }
+      });
+
+      return true;
     }
 
-    public void Unpack(string folder, string subfolder)
+    public bool Unpack(string folder, string subfolder)
     {
       if (!IsValud())
-        return;
+        return false;
 
       using (var zipFile = ZipFile.OpenRead(File.FullName))
       {
-        foreach (var entry in zipFile.Entries.Where(e => e.FullName.StartsWith(subfolder)))
+        var entries = zipFile.Entries.ToList();
+        if (!string.IsNullOrWhiteSpace(subfolder))
+          entries = entries.Where(e => e.FullName.StartsWith(subfolder)).ToList();
+        foreach (var entry in entries)
         {
           ExceptionHandler.TryExecute(() =>
           {
-            var fixedName = Regex.Replace(entry.FullName, string.Format("^{0}//*", subfolder), string.Empty, RegexOptions.IgnoreCase);
+            var fixedName = Regex.Replace(entry.FullName, string.Format("^{0}//*", subfolder), string.Empty,
+              RegexOptions.IgnoreCase);
             var fullPath = Path.Combine(folder, fixedName);
             if (Path.GetFileName(fullPath).Length == 0)
             {
@@ -53,6 +63,7 @@ namespace GitHubUpdater.Shared.Archive
           });
         }
       }
+      return true;
     }
 
     public bool Test()
@@ -60,11 +71,11 @@ namespace GitHubUpdater.Shared.Archive
       if (!IsValud())
         return false;
 
-      using (var zipFile = ZipFile.OpenRead(File.FullName))
+      try
       {
-        foreach (var entry in zipFile.Entries)
+        using (var zipFile = ZipFile.OpenRead(File.FullName))
         {
-          var tested = ExceptionHandler<bool>.TryExecute(() =>
+          foreach (var entry in zipFile.Entries)
           {
             using (var destination = new MemoryStream())
             {
@@ -72,12 +83,14 @@ namespace GitHubUpdater.Shared.Archive
                 stream.CopyTo(destination);
               return destination.Length == entry.Length;
             }
-          }, false);
-          if (!tested)
-            return false;
+          }
         }
+        return true;
       }
-      return true;
+      catch (Exception)
+      {
+        return false;
+      }
     }
 
     public ZipArchive(string file)

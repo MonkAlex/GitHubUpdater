@@ -1,9 +1,11 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using GitHubUpdater.Shared;
+using GitHubUpdater.Shared.Archive;
 using GitHubUpdater.WPF.Command;
 
 namespace GitHubUpdater.WPF.ViewModel
@@ -54,12 +56,29 @@ namespace GitHubUpdater.WPF.ViewModel
       return await file.Download(args, Target);
     }
 
-    public void Handler(DownloadProgressChangedEventArgs args)
+    public void DownloadingHandler(DownloadProgressChangedEventArgs args)
     {
       Downloaded = args.ProgressPercentage / 100.00;
       DownloadText = string.Format("{0} / {1}",
         args.BytesReceived.HumanizeByteSize(), args.TotalBytesToReceive.HumanizeByteSize());
     }
+
+    public async Task<bool> Unpack(IProgress<IProcess> args)
+    {
+      if (File.Exists(Target))
+      {
+        var ext = Path.GetExtension(Target);
+        foreach (var type in Generic.CreateAllTypes<IArchive>(Target).Where(t => t.Extension.Contains(ext)))
+        {
+          if (type.Test())
+          {
+#warning Надо оповещение о распаковке
+            return await Task.Run(() => type.Unpack(TargetFolder, Subfolder));
+          }
+        }
+      }
+      return false;
+    } 
 
     public DownloadedFileViewModel(DownloadFile file, string targetFolder, string unpackFolder)
     {
