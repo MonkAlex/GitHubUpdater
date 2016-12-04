@@ -6,7 +6,7 @@
         ShowInTaskbar="True"
         ContentRendered="Update_OnContentRendered"
         DataContextChanged="Converting_OnDataContextChanged"
-        Title="{Binding Title}" Height="120" Width="300">
+        Title="{Binding Title}" Height="120" Width="450">
   <Window.TaskbarItemInfo>
     <TaskbarItemInfo ProgressState="{Binding TaskbarItemProgressState}" ProgressValue="{Binding Percent}"/>
   </Window.TaskbarItemInfo>

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -35,6 +36,11 @@ namespace GitHubUpdater.WPF.Command
       var taskToUnpack = model.DownloadedFiles
         .Select(f => f.Unpack(new Progress<UnpackProgress>(f.UnpackingHandler)));
       await Task.WhenAll(taskToUnpack);
+
+      if (File.Exists(model.Option.RunAfterUpdate))
+      {
+        new Process() { StartInfo = new ProcessStartInfo(model.Option.RunAfterUpdate) }.Start();
+      }
 
       model.ProgressState = ProgressState.None;
       model.State = ConvertState.Completed;

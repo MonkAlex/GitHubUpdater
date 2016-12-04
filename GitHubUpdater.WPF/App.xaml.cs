@@ -57,20 +57,16 @@ namespace GitHubUpdater.WPF
             }
             */
 
-      ExceptionHandler.Handler += ExceptionHandlerOnHandler;
-
       var viewModel = new UpdateViewModel(option);
       window.DataContext = viewModel;
       window.Show();
     }
 
-    private void ExceptionHandlerOnHandler(object sender, ExceptionEventArgs args)
+    public static void ExceptionHandlerOnHandler(object sender, ExceptionEventArgs args)
     {
-      Current.Dispatcher.Invoke(() =>
-      {
-        var button = AbortRetryIgnore.ShowDialog(Current.Windows.OfType<Window>().LastOrDefault(), args.Exception.Message);
-        args.Handled = button;
-      });
+      var handled = Current.Dispatcher.Invoke(() => 
+        AbortRetryIgnore.ShowDialog(Current.Windows.OfType<Window>().LastOrDefault(), args.Exception.Message));
+      args.Handled = handled;
     }
   }
 }

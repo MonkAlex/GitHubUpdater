@@ -22,7 +22,7 @@ namespace GitHubUpdater.Shared
       this.Exception = ex;
     }
   }
-
+  /*
   public static class ExceptionHandler
   {
     public static event EventHandler<ExceptionEventArgs> Handler;
@@ -81,4 +81,5 @@ namespace GitHubUpdater.Shared
       return e.Handled;
     }
   }
+    */
 }

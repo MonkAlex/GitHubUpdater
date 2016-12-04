@@ -12,6 +12,11 @@ namespace GitHubUpdater.Shared.Archive
     string[] Extension { get; }
 
     /// <summary>
+    /// Event to show user error.
+    /// </summary>
+    event EventHandler<ExceptionEventArgs> ExceptionThrowed;
+
+    /// <summary>
     /// Unpack to folder.
     /// </summary>
     /// <param name="folder">Target folder.</param>

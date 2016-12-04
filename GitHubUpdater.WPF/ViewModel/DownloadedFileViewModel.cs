@@ -78,7 +78,20 @@ namespace GitHubUpdater.WPF.ViewModel
         {
           if (type.Test())
           {
-            return await Task.Run(() => type.Unpack(TargetFolder, Subfolder, args));
+            type.ExceptionThrowed += GitHubUpdater.WPF.App.ExceptionHandlerOnHandler;
+            var task = Task.Run(() => type.Unpack(TargetFolder, Subfolder, args));
+            task.ContinueWith(t =>
+            {
+              type.ExceptionThrowed -= GitHubUpdater.WPF.App.ExceptionHandlerOnHandler;
+            });
+            try
+            {
+              return await task;
+            }
+            catch (Exception)
+            {
+              return false;
+            }
           }
         }
       }

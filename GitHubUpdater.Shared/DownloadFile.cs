@@ -42,7 +42,7 @@ namespace GitHubUpdater.Shared
           await targetFile.WriteAsync(content, 0, content.Length);
         }
       }
-      catch (Exception e)
+      catch
       {
         return false;
       }

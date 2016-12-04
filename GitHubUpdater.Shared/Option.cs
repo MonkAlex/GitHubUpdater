@@ -25,6 +25,9 @@ namespace GitHubUpdater.Shared
     [Option("unpackFolder", Required = false, HelpText = "If archive content in subfolder - set this name.")]
     public string UnpackFolder { get; set; }
 
+    [Option("runAfterUpdate", Required = false, HelpText = "Set path to exe (bat, cmd) file, who runned after update installed.")]
+    public string RunAfterUpdate { get; set; }
+
     [ParserState]
     public IParserState ParserState { get; set; }
 
