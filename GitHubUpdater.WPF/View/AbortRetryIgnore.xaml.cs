@@ -10,15 +10,15 @@ namespace GitHubUpdater.WPF.View
   /// </summary>
   public partial class AbortRetryIgnore : Window
   {
-    public ExceptionHandle Result;
+    public UpdateExceptionReaction Result;
 
     public AbortRetryIgnore()
     {
       InitializeComponent();
-      Result = ExceptionHandle.Abort;
+      Result = UpdateExceptionReaction.Abort;
     }
 
-    public static ExceptionHandle ShowDialog(Window window, string text)
+    public static IExceptionReaction ShowDialog(Window window, string text)
     {
       var dialog = new AbortRetryIgnore {Text = {Text = text}, Owner = window };
       dialog.ShowDialog();
@@ -28,7 +28,7 @@ namespace GitHubUpdater.WPF.View
     private void ButtonBase_OnClick(object sender, RoutedEventArgs e)
     {
       var text = (sender as Button).Content.ToString();
-      Enum.TryParse(text, out Result);
+      UpdateExceptionReaction.TryParse(value:text, result: out Result);
       this.Close();
     }
   }

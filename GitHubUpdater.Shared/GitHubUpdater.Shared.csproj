@@ -63,6 +63,7 @@
     <Compile Include="Archive\ZipArchive.cs" />
     <Compile Include="DownloadFile.cs" />
     <Compile Include="DownloadUpdate.cs" />
+    <Compile Include="Enumeration.cs" />
     <Compile Include="ExceptionHandler.cs" />
     <Compile Include="IProgress.cs" />
     <Compile Include="Option.cs" />

@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Reflection.Emit;
-using System.Threading.Tasks;
 
 namespace GitHubUpdater.Shared.Archive
 {
@@ -14,7 +12,7 @@ namespace GitHubUpdater.Shared.Archive
     /// <summary>
     /// Event to show user error.
     /// </summary>
-    event EventHandler<ExceptionEventArgs> ExceptionThrowed;
+    event EventHandler<UnpackExceptionEventArgs> ExceptionThrowed;
 
     /// <summary>
     /// Unpack to folder.

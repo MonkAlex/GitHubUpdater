@@ -53,7 +53,14 @@ namespace GitHubUpdater.WPF.ViewModel
 
     public async Task<bool> Download(IProgress<DownloadProgress> args)
     {
-      return await file.Download(args, Target);
+      file.ExceptionThrowed += GitHubUpdater.WPF.App.ExceptionHandlerOnHandler;
+      var task = file.Download(args, Target);
+      task.ContinueWith(t =>
+      {
+        file.ExceptionThrowed -= GitHubUpdater.WPF.App.ExceptionHandlerOnHandler;
+      });
+
+      return await task;
     }
 
     public void DownloadingHandler(DownloadProgress args)

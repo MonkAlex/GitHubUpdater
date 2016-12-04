@@ -62,11 +62,18 @@ namespace GitHubUpdater.WPF
       window.Show();
     }
 
-    public static void ExceptionHandlerOnHandler(object sender, ExceptionEventArgs args)
+    public static void ExceptionHandlerOnHandler(object sender, UnpackExceptionEventArgs e)
     {
-      var handled = Current.Dispatcher.Invoke(() => 
-        AbortRetryIgnore.ShowDialog(Current.Windows.OfType<Window>().LastOrDefault(), args.Exception.Message));
-      args.Handled = handled;
+      var handled = Current.Dispatcher.Invoke(() =>
+        AbortRetryIgnore.ShowDialog(Current.Windows.OfType<Window>().LastOrDefault(), e.Exception.Message));
+      e.Handled = UpdateExceptionReaction.GetAll().Single(r => r.Value == handled.Value);
+    }
+
+    public static void ExceptionHandlerOnHandler(object sender, DownloadExceptionEventArgs e)
+    {
+      var handled = Current.Dispatcher.Invoke(() =>
+        AbortRetryIgnore.ShowDialog(Current.Windows.OfType<Window>().LastOrDefault(), e.Exception.Message));
+      e.Handled = DownloadExceptionReaction.GetAll().Single(r => r.Value == handled.Value);
     }
   }
 }

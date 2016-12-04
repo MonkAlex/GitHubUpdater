@@ -14,6 +14,8 @@ namespace GitHubUpdater.Shared
 
     public int Size { get; }
 
+    public event EventHandler<DownloadExceptionEventArgs> ExceptionThrowed;
+
     public async Task<bool> Download(string target)
     {
       return await Download(null, target).ConfigureAwait(false);
@@ -23,28 +25,42 @@ namespace GitHubUpdater.Shared
     {
       try
       {
-        var webClient = new WebClient();
-        if (progress != null)
-          webClient.DownloadProgressChanged += (sender, args) =>
-          {
-            var state = new DownloadProgress
-            {
-              ProgressPercentage = args.ProgressPercentage,
-              BytesReceived = args.BytesReceived,
-              TotalBytesToReceive = args.TotalBytesToReceive
-            };
-            progress.Report(state);
-          };
-        var content = await webClient.DownloadDataTaskAsync(this.Uri).ConfigureAwait(false);
-
-        using (var targetFile = File.OpenWrite(target))
-        {
-          await targetFile.WriteAsync(content, 0, content.Length);
-        }
+        return await Shared.ExceptionHandler.TryExecuteAsync(() => DownloadImpl(progress, target),
+          Task.FromResult(false),
+          OnExceptionThrowed);
       }
-      catch
+      catch (Exception)
       {
         return false;
+      }
+    }
+
+    private IExceptionReaction OnExceptionThrowed(Exception exception)
+    {
+      var args = new DownloadExceptionEventArgs(exception, Uri);
+      ExceptionThrowed?.Invoke(this, args);
+      return args.Handled;
+    }
+
+    private async Task<bool> DownloadImpl(IProgress<DownloadProgress> progress, string target)
+    {
+      var webClient = new WebClient();
+      if (progress != null)
+        webClient.DownloadProgressChanged += (sender, args) =>
+        {
+          var state = new DownloadProgress
+          {
+            ProgressPercentage = args.ProgressPercentage,
+            BytesReceived = args.BytesReceived,
+            TotalBytesToReceive = args.TotalBytesToReceive
+          };
+          progress.Report(state);
+        };
+      var content = await webClient.DownloadDataTaskAsync(Uri + "1").ConfigureAwait(false);
+
+      using (var targetFile = File.OpenWrite(target))
+      {
+        await targetFile.WriteAsync(content, 0, content.Length).ConfigureAwait(false);
       }
 
       return true;
@@ -52,9 +68,9 @@ namespace GitHubUpdater.Shared
 
     public DownloadFile(ReleaseAsset asset)
     {
-      this.Uri = new Uri(asset.BrowserDownloadUrl);
-      this.Name = asset.Name;
-      this.Size = asset.Size;
+      Uri = new Uri(asset.BrowserDownloadUrl);
+      Name = asset.Name;
+      Size = asset.Size;
     }
   }
 }

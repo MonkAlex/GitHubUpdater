@@ -3,16 +3,15 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace GitHubUpdater.Shared.Archive
 {
   public class ZipArchive : IArchive
   {
     public string[] Extension { get { return new[] { ".zip", ".cbz" }; } }
-    public FileInfo File { get; set; }
+    public FileInfo File { get; }
 
-    public event EventHandler<ExceptionEventArgs> ExceptionThrowed;
+    public event EventHandler<UnpackExceptionEventArgs> ExceptionThrowed;
 
     protected bool IsValud()
     {
@@ -24,26 +23,14 @@ namespace GitHubUpdater.Shared.Archive
       if (!IsValud())
         return false;
 
-      ExceptionHandle? handled = ExceptionHandle.Retry;
-      while (handled.Value == ExceptionHandle.Retry)
+      ExceptionHandler.TryExecute(() =>
       {
-        try
+        using (var zipFile = ZipFile.OpenRead(File.FullName))
         {
-          using (var zipFile = ZipFile.OpenRead(File.FullName))
-          {
-            zipFile.ExtractToDirectory(folder);
-          }
-          break;
+          zipFile.ExtractToDirectory(folder);
         }
-        catch (Exception ex)
-        {
-          handled = this.OnExceptionThrowed(new ExceptionEventArgs(ex));
-          if (!handled.HasValue || handled == ExceptionHandle.Abort)
-            throw;
-          if (handled.Value == ExceptionHandle.Ignore)
-            break;
-        }
-      }
+      },
+      OnExceptionThrowed);
 
       return true;
     }
@@ -72,35 +59,22 @@ namespace GitHubUpdater.Shared.Archive
             unpack.LastFile = entry.Name;
             progress.Report(unpack);
           }
-          ExceptionHandle? handled = ExceptionHandle.Retry;
-          while (handled.Value == ExceptionHandle.Retry)
+          ExceptionHandler.TryExecute(() =>
           {
-            try
+            var fixedName = Regex.Replace(entry.FullName, string.Format("^{0}//*", subfolder), string.Empty,
+              RegexOptions.IgnoreCase);
+            var fullPath = Path.Combine(folder, fixedName);
+            if (Path.GetFileName(fullPath).Length == 0)
             {
-              var fixedName = Regex.Replace(entry.FullName, string.Format("^{0}//*", subfolder), string.Empty,
-                RegexOptions.IgnoreCase);
-              var fullPath = Path.Combine(folder, fixedName);
-              if (Path.GetFileName(fullPath).Length == 0)
-              {
-                if (entry.Length == 0L)
-                  Directory.CreateDirectory(fullPath);
-              }
-              else
-              {
-                Directory.CreateDirectory(Path.GetDirectoryName(fullPath));
-                entry.ExtractToFile(fullPath, true);
-              }
-              break;
+              if (entry.Length == 0L)
+                Directory.CreateDirectory(fullPath);
             }
-            catch (Exception ex)
+            else
             {
-              handled = this.OnExceptionThrowed(new ExceptionEventArgs(ex));
-              if (!handled.HasValue || handled == ExceptionHandle.Abort)
-                throw;
-              if (handled.Value == ExceptionHandle.Ignore)
-                break;
+              Directory.CreateDirectory(Path.GetDirectoryName(fullPath));
+              entry.ExtractToFile(fullPath, true);
             }
-          }
+          }, OnExceptionThrowed);
         }
       }
       return true;
@@ -135,13 +109,14 @@ namespace GitHubUpdater.Shared.Archive
 
     public ZipArchive(string file)
     {
-      this.File = new FileInfo(file);
+      File = new FileInfo(file);
     }
 
-    protected virtual ExceptionHandle? OnExceptionThrowed(ExceptionEventArgs ex)
+    protected virtual UpdateExceptionReaction OnExceptionThrowed(Exception ex)
     {
-      ExceptionThrowed?.Invoke(this, ex);
-      return ex.Handled;
+      var reaction = new UnpackExceptionEventArgs(ex);
+      ExceptionThrowed?.Invoke(this, reaction);
+      return reaction.Handled;
     }
   }
 }
