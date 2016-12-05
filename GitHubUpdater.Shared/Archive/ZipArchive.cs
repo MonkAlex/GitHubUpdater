@@ -18,29 +18,7 @@ namespace GitHubUpdater.Shared.Archive
       return File.Exists && Extension.Contains(File.Extension);
     }
 
-    public bool Unpack(string folder)
-    {
-      if (!IsValud())
-        return false;
-
-      ExceptionHandler.TryExecute(() =>
-      {
-        using (var zipFile = ZipFile.OpenRead(File.FullName))
-        {
-          zipFile.ExtractToDirectory(folder);
-        }
-      },
-      OnExceptionThrowed);
-
-      return true;
-    }
-
-    public bool Unpack(string folder, string subfolder)
-    {
-      return Unpack(folder, subfolder, null);
-    }
-
-    public bool Unpack(string folder, string subfolder, IProgress<UnpackProgress> progress)
+    public bool Unpack(string folder, bool unpackRootSubfolder, IProgress<UnpackProgress> progress)
     {
       if (!IsValud())
         return false;
@@ -48,8 +26,21 @@ namespace GitHubUpdater.Shared.Archive
       using (var zipFile = ZipFile.OpenRead(File.FullName))
       {
         var entries = zipFile.Entries.ToList();
-        if (!string.IsNullOrWhiteSpace(subfolder))
-          entries = entries.Where(e => e.FullName.StartsWith(subfolder)).ToList();
+        var subfolder = string.Empty;
+
+        if (unpackRootSubfolder)
+        {
+          var files = entries.Select(e => e.FullName).ToList();
+          subfolder = files.OrderBy(f => f.Length).Select(Path.GetDirectoryName).FirstOrDefault();
+          while (subfolder != null)
+          {
+            var count = files.GroupBy(f => f.StartsWith(subfolder)).Count();
+            if (count == 1)
+              break;
+            subfolder = Path.GetDirectoryName(subfolder);
+          }
+        }
+
         foreach (var entry in entries)
         {
           if (progress != null)

@@ -86,7 +86,7 @@ namespace GitHubUpdater.WPF.ViewModel
           if (type.Test())
           {
             type.ExceptionThrowed += GitHubUpdater.WPF.App.ExceptionHandlerOnHandler;
-            var task = Task.Run(() => type.Unpack(TargetFolder, Subfolder, args));
+            var task = Task.Run(() => type.Unpack(TargetFolder, UnpackRootSubfolder, args));
             task.ContinueWith(t =>
             {
               type.ExceptionThrowed -= GitHubUpdater.WPF.App.ExceptionHandlerOnHandler;
@@ -105,17 +105,17 @@ namespace GitHubUpdater.WPF.ViewModel
       return false;
     }
 
-    public DownloadedFileViewModel(DownloadFile file, string targetFolder, string unpackFolder)
+    public DownloadedFileViewModel(DownloadFile file, string targetFolder, bool unpackSubfolder)
     {
       this.file = file;
       //this.Unpack = new UnpackCommand(this);
       this.Target = Path.Combine(targetFolder, file.Name);
       this.TargetFolder = targetFolder;
-      this.Subfolder = unpackFolder;
+      this.UnpackRootSubfolder = unpackSubfolder;
     }
 
     public string TargetFolder { get; set; }
 
-    public string Subfolder { get; set; }
+    public bool UnpackRootSubfolder { get; set; }
   }
 }

@@ -18,25 +18,10 @@ namespace GitHubUpdater.Shared.Archive
     /// Unpack to folder.
     /// </summary>
     /// <param name="folder">Target folder.</param>
-    /// <returns>True, if unpack completed.</returns>
-    bool Unpack(string folder);
-
-    /// <summary>
-    /// Unpack to folder.
-    /// </summary>
-    /// <param name="folder">Target folder.</param>
-    /// <param name="subfolder">Folder in archive for unpack.</param>
-    /// <returns>True, if unpack completed.</returns>
-    bool Unpack(string folder, string subfolder);
-
-    /// <summary>
-    /// Unpack to folder.
-    /// </summary>
-    /// <param name="folder">Target folder.</param>
-    /// <param name="subfolder">Folder in archive for unpack.</param>
+    /// <param name="unpackRootSubfolder">Unpack subfolder, if this single on root.</param>
     /// <param name="progress">Callback for progress.</param>
     /// <returns>True, if unpack completed.</returns>
-    bool Unpack(string folder, string subfolder, IProgress<UnpackProgress> progress);
+    bool Unpack(string folder, bool unpackRootSubfolder, IProgress<UnpackProgress> progress);
 
     /// <summary>
     /// Test archive.

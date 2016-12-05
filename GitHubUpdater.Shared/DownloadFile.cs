@@ -56,7 +56,7 @@ namespace GitHubUpdater.Shared
           };
           progress.Report(state);
         };
-      var content = await webClient.DownloadDataTaskAsync(Uri + "1").ConfigureAwait(false);
+      var content = await webClient.DownloadDataTaskAsync(Uri).ConfigureAwait(false);
 
       using (var targetFile = File.OpenWrite(target))
       {

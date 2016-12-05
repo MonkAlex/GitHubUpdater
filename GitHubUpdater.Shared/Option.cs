@@ -22,10 +22,10 @@ namespace GitHubUpdater.Shared
     [Option("unpack", Required = false, DefaultValue = false, HelpText = "Set \"true\", if content packed to zip archive.")]
     public bool Unpack { get; set; }
 
-    [Option("unpackFolder", Required = false, HelpText = "If archive content in subfolder - set this name.")]
-    public string UnpackFolder { get; set; }
+    [Option("unpackSingleSubfolder", Required = false, HelpText = "If archive content in subfolder - set true.")]
+    public bool UnpackFolder { get; set; }
 
-    [Option("runAfterUpdate", Required = false, HelpText = "Set path to exe (bat, cmd) file, who runned after update installed.")]
+    [Option("runAfterUpdate", Required = false, HelpText = "Set path to exe (bat, cmd) file, who runned after update installed. Supported regex pattern format. For example - \"twitch-gui.exe$\".")]
     public string RunAfterUpdate { get; set; }
 
     [ParserState]
