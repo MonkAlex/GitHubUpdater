@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace GitHubUpdater.Launcher
@@ -23,10 +24,11 @@ namespace GitHubUpdater.Launcher
       var lastVersion = versions
         .Select(v => new {path = v, version = new Version(Path.GetFileName(v))})
         .OrderBy(c => c.version)
-        .First()
-        .path;
+        .First();
 
-      InitVersion(lastVersion, args);
+      var selfupdate = $"--fromFile=\"{directory}\\default.config\" --version=\"{lastVersion.version}\"";
+      new Thread(() => InitVersion(lastVersion.path, new string[] {selfupdate})).Start();
+      InitVersion(lastVersion.path, args);
     }
 
     private static void OpenWebsite(ExitCodes code)

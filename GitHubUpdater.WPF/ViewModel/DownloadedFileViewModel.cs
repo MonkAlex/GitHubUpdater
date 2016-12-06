@@ -105,13 +105,13 @@ namespace GitHubUpdater.WPF.ViewModel
       return false;
     }
 
-    public DownloadedFileViewModel(DownloadFile file, string targetFolder, bool unpackSubfolder)
+    public DownloadedFileViewModel(DownloadFile file, string targetFolder, bool unpackRootSubfolder)
     {
       this.file = file;
       //this.Unpack = new UnpackCommand(this);
       this.Target = Path.Combine(targetFolder, file.Name);
       this.TargetFolder = targetFolder;
-      this.UnpackRootSubfolder = unpackSubfolder;
+      this.UnpackRootSubfolder = unpackRootSubfolder;
     }
 
     public string TargetFolder { get; set; }
