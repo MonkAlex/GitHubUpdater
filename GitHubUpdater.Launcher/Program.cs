@@ -26,9 +26,12 @@ namespace GitHubUpdater.Launcher
         .OrderBy(c => c.version)
         .First();
 
-      var selfupdate = $"--fromFile=\"{directory}\\default.config\" --version=\"{lastVersion.version}\"";
-      new Thread(() => InitVersion(lastVersion.path, new string[] {selfupdate})).Start();
-      InitVersion(lastVersion.path, args);
+      var selfupdate = $"--fromFile=\"{directory}default.config\" " +
+                       $"--version=\"{lastVersion.version}\" " +
+                       $"--silent " +
+                       $"--outputFolder=\"{directory}%version%\\\"";
+      new Thread(() => InitVersion(lastVersion.path, new [] {selfupdate})).Start();
+      //InitVersion(lastVersion.path, args);
     }
 
     private static void OpenWebsite(ExitCodes code)

@@ -16,14 +16,28 @@ namespace GitHubUpdater.Shared
 
     public async Task<bool> HasUpdate()
     {
-      var release = await GetLatestRelease().ConfigureAwait(false);
-      return !string.Equals(Option.Version, release.TagName, StringComparison.InvariantCultureIgnoreCase);
+      try
+      {
+        var release = await GetLatestRelease().ConfigureAwait(false);
+        return !string.Equals(Option.Version, release.TagName, StringComparison.InvariantCultureIgnoreCase);
+      }
+      catch (Exception)
+      {
+        return false;
+      }
     }
 
     public async Task<IQueryable<DownloadFile>> GetFiles()
     {
-      var release = await GetLatestRelease().ConfigureAwait(false);
-      return GetFiles(release);
+      try
+      {
+        var release = await GetLatestRelease().ConfigureAwait(false);
+        return GetFiles(release);
+      }
+      catch (Exception)
+      {
+        return Enumerable.Empty<DownloadFile>().AsQueryable();
+      }
     }
 
     private IQueryable<DownloadFile> GetFiles(Release release)
@@ -39,7 +53,7 @@ namespace GitHubUpdater.Shared
         catch (Exception) { }
       }
 
-      return assets.Select(a => new DownloadFile(a));
+      return assets.Select(a => new DownloadFile(a, release.TagName));
     }
 
     private Task<Release> GetLatestRelease()

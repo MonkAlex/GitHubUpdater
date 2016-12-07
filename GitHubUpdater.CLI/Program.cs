@@ -11,11 +11,6 @@ namespace GitHubUpdater.CLI
     static void Main(string[] args)
     {
       var option = Option.CreateFromArgs();
-      if (option.HasError)
-      {
-        Console.WriteLine(option.GetUsage());
-        return;
-      }
       AsyncMain(option).Wait();
     }
 

@@ -26,6 +26,7 @@ namespace GitHubUpdater.WPF.Command
       var download = new DownloadUpdate(model.Option);
       foreach (var file in await download.GetFiles())
       {
+        model.Option.ProcessOutputFolder(file);
         var viewModel = new DownloadedFileViewModel(file, model.Option.OutputFolder, model.Option.UnpackRootSubfolder);
         model.DownloadedFiles.Add(viewModel);
       }

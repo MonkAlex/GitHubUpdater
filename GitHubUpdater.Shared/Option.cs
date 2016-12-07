@@ -36,11 +36,18 @@ namespace GitHubUpdater.Shared
     [Option("fromFile", Required = false, HelpText = "Set path to config file with default parameters.")]
     public string FromFile { get; set; }
 
-    [ParserState][JsonIgnore]
-    public IParserState ParserState { get; set; }
+    [Option("silent", Required = false, HelpText = "Set to hide window.")]
+    public bool Silent { get; set; }
 
-    [JsonIgnore]
-    public bool HasError { get { return this.ParserState != null && this.ParserState.Errors.Any(); } }
+    public void ProcessOutputFolder(DownloadFile file)
+    {
+      if (file == null)
+        return;
+
+      var versionSubstring = "%version%";
+      if (OutputFolder.Contains(versionSubstring))
+        OutputFolder = OutputFolder.Replace(versionSubstring, file.Tag);
+    }
 
     public void Save(string path)
     {

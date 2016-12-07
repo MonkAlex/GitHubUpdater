@@ -14,6 +14,8 @@ namespace GitHubUpdater.Shared
 
     public int Size { get; }
 
+    public string Tag { get; }
+
     public event EventHandler<DownloadExceptionEventArgs> ExceptionThrowed;
 
     public async Task<bool> Download(string target)
@@ -66,11 +68,12 @@ namespace GitHubUpdater.Shared
       return true;
     }
 
-    public DownloadFile(ReleaseAsset asset)
+    public DownloadFile(ReleaseAsset asset, string tag)
     {
       Uri = new Uri(asset.BrowserDownloadUrl);
       Name = asset.Name;
       Size = asset.Size;
+      Tag = tag;
     }
   }
 }
