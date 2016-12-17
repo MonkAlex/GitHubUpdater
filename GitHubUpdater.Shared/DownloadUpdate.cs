@@ -21,8 +21,9 @@ namespace GitHubUpdater.Shared
         var release = await GetLatestRelease().ConfigureAwait(false);
         return !string.Equals(Option.Version, release.TagName, StringComparison.InvariantCultureIgnoreCase);
       }
-      catch (Exception)
+      catch (Exception ex)
       {
+        this.Debug(ex);
         return false;
       }
     }
@@ -32,12 +33,15 @@ namespace GitHubUpdater.Shared
       try
       {
         var release = await GetLatestRelease().ConfigureAwait(false);
-        return GetFiles(release);
+        if (!string.Equals(Option.Version, release.TagName, StringComparison.InvariantCultureIgnoreCase))
+          return GetFiles(release);
+        this.Debug("New version not found.");
       }
-      catch (Exception)
+      catch (Exception ex)
       {
-        return Enumerable.Empty<DownloadFile>().AsQueryable();
+        this.Debug(ex);
       }
+      return Enumerable.Empty<DownloadFile>().AsQueryable();
     }
 
     private IQueryable<DownloadFile> GetFiles(Release release)
@@ -50,7 +54,10 @@ namespace GitHubUpdater.Shared
           var regex = new Regex(Option.DownloadMask, RegexOptions.IgnoreCase);
           assets = assets.Where(a => regex.IsMatch(a.Name));
         }
-        catch (Exception) { }
+        catch (Exception ex)
+        {
+          this.Debug(ex);
+        }
       }
 
       return assets.Select(a => new DownloadFile(a, release.TagName));

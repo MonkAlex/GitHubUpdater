@@ -60,6 +60,10 @@ namespace GitHubUpdater.Shared
         };
       var content = await webClient.DownloadDataTaskAsync(Uri).ConfigureAwait(false);
 
+      var folder = Path.GetDirectoryName(target);
+      if (!Directory.Exists(folder))
+        Directory.CreateDirectory(folder);
+
       using (var targetFile = File.OpenWrite(target))
       {
         await targetFile.WriteAsync(content, 0, content.Length).ConfigureAwait(false);

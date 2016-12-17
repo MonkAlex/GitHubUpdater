@@ -1,13 +1,10 @@
 ﻿using System;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using GitHubUpdater.Shared;
-using GitHubUpdater.Shared.Archive;
 using GitHubUpdater.WPF.ViewModel;
 
 namespace GitHubUpdater.WPF.Command
@@ -42,7 +39,7 @@ namespace GitHubUpdater.WPF.Command
         var taskToLoad = model.DownloadedFiles
           .Select(f => f.Download(new Progress<DownloadProgress>(f.DownloadingHandler)));
         await Task.WhenAll(taskToLoad);
-        
+
         this.Debug("Download completed.");
 
         if (model.Option.Unpack)
@@ -56,24 +53,27 @@ namespace GitHubUpdater.WPF.Command
           this.Debug("Unpack completed.");
         }
 
-        if (File.Exists(model.Option.RunAfterUpdate))
+        if (!string.IsNullOrWhiteSpace(model.Option.RunAfterUpdate))
         {
-          this.Debug($"Run app - {model.Option.RunAfterUpdate}.");
-          new Process() { StartInfo = new ProcessStartInfo(model.Option.RunAfterUpdate) }.Start();
-        }
-        else
-        {
-          var files = Directory.GetFiles(model.Option.OutputFolder, "*", SearchOption.AllDirectories).ToList();
-          try
+          if (File.Exists(model.Option.RunAfterUpdate))
           {
-            var regex = new Regex(model.Option.RunAfterUpdate, RegexOptions.IgnoreCase);
-            files = files.Where(a => regex.IsMatch(a)).ToList();
+            this.Debug($"Run app - {model.Option.RunAfterUpdate}.");
+            new Process() { StartInfo = new ProcessStartInfo(model.Option.RunAfterUpdate) }.Start();
           }
-          catch (Exception) { }
-          foreach (var file in files)
+          else
           {
-            this.Debug($"Run app - {file}.");
-            new Process() { StartInfo = new ProcessStartInfo(file) }.Start();
+            var files = Directory.GetFiles(model.Option.OutputFolder, "*", SearchOption.AllDirectories).ToList();
+            try
+            {
+              var regex = new Regex(model.Option.RunAfterUpdate, RegexOptions.IgnoreCase);
+              files = files.Where(a => regex.IsMatch(a)).ToList();
+            }
+            catch (Exception) { }
+            foreach (var file in files)
+            {
+              this.Debug($"Run app - {file}.");
+              new Process() { StartInfo = new ProcessStartInfo(file) }.Start();
+            }
           }
         }
 

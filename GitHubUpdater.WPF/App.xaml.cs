@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Data;
-using System.Linq;
-using System.Net;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Linq;
 using System.Windows;
 using GitHubUpdater.Shared;
 using GitHubUpdater.WPF.View;
@@ -18,9 +11,11 @@ namespace GitHubUpdater.WPF
   /// </summary>
   public partial class App : Application
   {
+    private static Option option;
+
     private void App_OnStartup(object sender, StartupEventArgs e)
     {
-      var option = Option.CreateFromArgs();
+      option = Option.CreateFromArgs();
       var viewModel = new UpdateViewModel(option);
 
       this.Debug($"App started, silent mode = {option.Silent}. Args - '{string.Join(" ", e.Args)}'");
@@ -40,6 +35,13 @@ namespace GitHubUpdater.WPF
 
     public static void ExceptionHandlerOnHandler(object sender, UnpackExceptionEventArgs e)
     {
+      if (option == null || option.Silent)
+      {
+        sender.Error(e.Exception);
+        e.Handled = UpdateExceptionReaction.Abort;
+        return;
+      }
+
       var handled = Current.Dispatcher.Invoke(() =>
         AbortRetryIgnore.ShowDialog(Current.Windows.OfType<Window>().LastOrDefault(), e.Exception.Message));
       e.Handled = UpdateExceptionReaction.GetAll().Single(r => r.Value == handled.Value);
@@ -47,6 +49,13 @@ namespace GitHubUpdater.WPF
 
     public static void ExceptionHandlerOnHandler(object sender, DownloadExceptionEventArgs e)
     {
+      if (option == null || option.Silent)
+      {
+        sender.Error(e.Exception);
+        e.Handled = DownloadExceptionReaction.Abort;
+        return;
+      }
+
       var handled = Current.Dispatcher.Invoke(() =>
         AbortRetryIgnore.ShowDialog(Current.Windows.OfType<Window>().LastOrDefault(), e.Exception.Message));
       e.Handled = DownloadExceptionReaction.GetAll().Single(r => r.Value == handled.Value);

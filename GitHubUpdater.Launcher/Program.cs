@@ -18,8 +18,7 @@ namespace GitHubUpdater.Launcher
       var versions = Directory.GetDirectories(directory);
       if (!versions.Any())
       {
-        OpenWebsite(ExitCodes.AnyVersionNotFound);
-        return;
+        Close(OpenWebsite(ExitCodes.AnyVersionNotFound));
       }
 
       var lastVersion = versions
@@ -32,43 +31,46 @@ namespace GitHubUpdater.Launcher
       var selfupdate = $"--fromFile=\"{directory}default.config\" " +
                        $"--version=\"{lastVersion.version}\" " +
                        $"--silent " +
-                       $"--outputFolder=\"{directory}%version%";
-      new Thread(() =>
+                       $"--outputFolder=\"{directory}";
+      var selfThread = new Thread(() =>
       {
         InitVersion(lastVersion.path, new[] {selfupdate});
         Shared.Log.Debug(typeof(Program), $"Selfupdate runned...");
-      }).Start();
-      InitVersion(lastVersion.path, args);
+      });
+      selfThread.Start();
+      var code = InitVersion(lastVersion.path, args);
+      Close(code, selfThread);
     }
 
-    private static void OpenWebsite(ExitCodes code)
+    private static ExitCodes OpenWebsite(ExitCodes code)
     {
       Process.Start(@"https://github.com/MonkAlex/GitHubUpdater/releases/latest");
-      var iCode = ExitCodes.WebsiteOpened | code;
-      Close(iCode);
+      return ExitCodes.WebsiteOpened | code;
     }
 
-    private static void Close(ExitCodes code)
+    private static void Close(ExitCodes code, Thread thread = null)
     {
+      if (thread != null)
+        thread.Join();
+
       Environment.Exit((int) code);
     }
 
-    private static void InitVersion(string lastVersion, string[] args)
+    private static ExitCodes InitVersion(string lastVersion, string[] args)
     {
       try
       {
         var canBeStarted = Directory.GetFiles(lastVersion, "*.exe");
         if (!canBeStarted.Any())
         {
-          OpenWebsite(ExitCodes.AnyExeFileNotFound);
-          return;
+          return OpenWebsite(ExitCodes.AnyExeFileNotFound);
         }
 
         if (canBeStarted.Length == 1)
         {
           var process = Process.Start(canBeStarted[0], string.Join(" ", args));
           process.WaitForInputIdle();
-          Close(ExitCodes.None);
+          return ExitCodes.None;
         }
 
         // TODO : Докрутить какую то фигню, чтобы сама запускала консольный или WPF варианты.
@@ -77,6 +79,7 @@ namespace GitHubUpdater.Launcher
       {
         Shared.Log.Error(typeof(Program), ex);
       }
+      return ExitCodes.None;
     }
   }
 }
