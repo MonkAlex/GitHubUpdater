@@ -23,7 +23,7 @@ namespace GitHubUpdater.Launcher
 
       var lastVersion = versions
         .Select(v => new {path = v, version = new Version(Path.GetFileName(v))})
-        .OrderBy(c => c.version)
+        .OrderByDescending(c => c.version)
         .First();
 
       Shared.Log.Debug(typeof(Program), $"Version {lastVersion.version} selected.");
