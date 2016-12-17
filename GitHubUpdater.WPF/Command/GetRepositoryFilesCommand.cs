@@ -20,46 +20,74 @@ namespace GitHubUpdater.WPF.Command
     {
       base.Execute(parameter);
 
-      model.ProgressState = ProgressState.Normal;
-      model.State = ConvertState.Started;
+      try
+      {
+        model.ProgressState = ProgressState.Normal;
+        model.State = ConvertState.Started;
 
-      var download = new DownloadUpdate(model.Option);
-      foreach (var file in await download.GetFiles())
-      {
-        model.Option.ProcessOutputFolder(file);
-        var viewModel = new DownloadedFileViewModel(file, model.Option.OutputFolder, model.Option.UnpackRootSubfolder);
-        model.DownloadedFiles.Add(viewModel);
-      }
-      /*
-      var taskToLoad = model.DownloadedFiles
-        .Select(f => f.Download(new Progress<DownloadProgress>(f.DownloadingHandler)));
-      await Task.WhenAll(taskToLoad);
-      */
-      var taskToUnpack = model.DownloadedFiles
-        .Select(f => f.Unpack(new Progress<UnpackProgress>(f.UnpackingHandler)));
-      await Task.WhenAll(taskToUnpack);
-
-      if (File.Exists(model.Option.RunAfterUpdate))
-      {
-        new Process() { StartInfo = new ProcessStartInfo(model.Option.RunAfterUpdate) }.Start();
-      }
-      else
-      {
-        var files = Directory.GetFiles(model.Option.OutputFolder, "*", SearchOption.AllDirectories).ToList();
-        try
+        var download = new DownloadUpdate(model.Option);
+        foreach (var file in await download.GetFiles())
         {
-          var regex = new Regex(model.Option.RunAfterUpdate, RegexOptions.IgnoreCase);
-          files = files.Where(a => regex.IsMatch(a)).ToList();
+          this.Debug($"File {file.Name} ({file.Uri}) found.");
+          model.Option.ProcessOutputFolder(file);
+          var viewModel = new DownloadedFileViewModel(file, model.Option.OutputFolder, model.Option.UnpackRootSubfolder);
+          model.DownloadedFiles.Add(viewModel);
         }
-        catch (Exception) { }
-        foreach (var file in files)
-        {
-          new Process() { StartInfo = new ProcessStartInfo(file) }.Start();
-        }
-      }
 
-      model.ProgressState = ProgressState.None;
+        if (model.DownloadedFiles.Count == 0)
+          this.Debug("Files\\updates not found.");
+
+        this.Debug("Download started.");
+
+        var taskToLoad = model.DownloadedFiles
+          .Select(f => f.Download(new Progress<DownloadProgress>(f.DownloadingHandler)));
+        await Task.WhenAll(taskToLoad);
+        
+        this.Debug("Download completed.");
+
+        if (model.Option.Unpack)
+        {
+          this.Debug("Unpack started.");
+
+          var taskToUnpack = model.DownloadedFiles
+            .Select(f => f.Unpack(new Progress<UnpackProgress>(f.UnpackingHandler)));
+          await Task.WhenAll(taskToUnpack);
+
+          this.Debug("Unpack completed.");
+        }
+
+        if (File.Exists(model.Option.RunAfterUpdate))
+        {
+          this.Debug($"Run app - {model.Option.RunAfterUpdate}.");
+          new Process() { StartInfo = new ProcessStartInfo(model.Option.RunAfterUpdate) }.Start();
+        }
+        else
+        {
+          var files = Directory.GetFiles(model.Option.OutputFolder, "*", SearchOption.AllDirectories).ToList();
+          try
+          {
+            var regex = new Regex(model.Option.RunAfterUpdate, RegexOptions.IgnoreCase);
+            files = files.Where(a => regex.IsMatch(a)).ToList();
+          }
+          catch (Exception) { }
+          foreach (var file in files)
+          {
+            this.Debug($"Run app - {file}.");
+            new Process() { StartInfo = new ProcessStartInfo(file) }.Start();
+          }
+        }
+
+        this.Debug($"Update completed.");
+        model.ProgressState = ProgressState.None;
+      }
+      catch (Exception ex)
+      {
+        this.Debug(ex);
+        model.ProgressState = ProgressState.Error;
+      }
       model.State = ConvertState.Completed;
+      if (model.Option.Silent)
+        App.Current.Shutdown(0);
     }
 
     public GetRepositoryFilesCommand(UpdateViewModel model)

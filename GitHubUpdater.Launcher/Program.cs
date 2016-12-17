@@ -14,6 +14,7 @@ namespace GitHubUpdater.Launcher
     static void Main(string[] args)
     {
       var directory = AppDomain.CurrentDomain.BaseDirectory;
+      Shared.Log.Debug(typeof(Program), $"App started form {directory}. Args - '{string.Join(" ", args)}'");
       var versions = Directory.GetDirectories(directory);
       if (!versions.Any())
       {
@@ -26,12 +27,18 @@ namespace GitHubUpdater.Launcher
         .OrderBy(c => c.version)
         .First();
 
+      Shared.Log.Debug(typeof(Program), $"Version {lastVersion.version} selected.");
+
       var selfupdate = $"--fromFile=\"{directory}default.config\" " +
                        $"--version=\"{lastVersion.version}\" " +
                        $"--silent " +
-                       $"--outputFolder=\"{directory}%version%\\\"";
-      new Thread(() => InitVersion(lastVersion.path, new [] {selfupdate})).Start();
-      //InitVersion(lastVersion.path, args);
+                       $"--outputFolder=\"{directory}%version%";
+      new Thread(() =>
+      {
+        InitVersion(lastVersion.path, new[] {selfupdate});
+        Shared.Log.Debug(typeof(Program), $"Selfupdate runned...");
+      }).Start();
+      InitVersion(lastVersion.path, args);
     }
 
     private static void OpenWebsite(ExitCodes code)
@@ -43,26 +50,33 @@ namespace GitHubUpdater.Launcher
 
     private static void Close(ExitCodes code)
     {
-      Environment.Exit((int)code);
+      Environment.Exit((int) code);
     }
 
     private static void InitVersion(string lastVersion, string[] args)
     {
-      var canBeStarted = Directory.GetFiles(lastVersion, "*.exe");
-      if (!canBeStarted.Any())
+      try
       {
-        OpenWebsite(ExitCodes.AnyExeFileNotFound);
-        return;
-      }
+        var canBeStarted = Directory.GetFiles(lastVersion, "*.exe");
+        if (!canBeStarted.Any())
+        {
+          OpenWebsite(ExitCodes.AnyExeFileNotFound);
+          return;
+        }
 
-      if (canBeStarted.Length == 1)
+        if (canBeStarted.Length == 1)
+        {
+          var process = Process.Start(canBeStarted[0], string.Join(" ", args));
+          process.WaitForInputIdle();
+          Close(ExitCodes.None);
+        }
+
+        // TODO : Докрутить какую то фигню, чтобы сама запускала консольный или WPF варианты.
+      }
+      catch (Exception ex)
       {
-        var process = Process.Start(canBeStarted[0], string.Join(" ", args));
-        process.WaitForInputIdle();
-        Close(ExitCodes.None);
+        Shared.Log.Error(typeof(Program), ex);
       }
-
-      // TODO : Докрутить какую то фигню, чтобы сама запускала консольный или WPF варианты.
     }
   }
 }

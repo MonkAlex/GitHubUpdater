@@ -20,9 +20,11 @@ namespace GitHubUpdater.WPF
   {
     private void App_OnStartup(object sender, StartupEventArgs e)
     {
-
       var option = Option.CreateFromArgs();
       var viewModel = new UpdateViewModel(option);
+
+      this.Debug($"App started, silent mode = {option.Silent}. Args - '{string.Join(" ", e.Args)}'");
+      Current.Exit += (o, args) => this.Debug("App closed.");
 
       if (option.Silent)
       {
