@@ -44,7 +44,7 @@ namespace GitHubUpdater.WPF.Command
 
         if (model.Option.Unpack)
         {
-          this.Debug("Unpack started.");
+          this.Debug($"Unpack to {model.Option.OutputFolder} started.");
 
           var taskToUnpack = model.DownloadedFiles
             .Select(f => f.Unpack(new Progress<UnpackProgress>(f.UnpackingHandler)));

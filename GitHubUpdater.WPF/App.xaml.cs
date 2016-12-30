@@ -15,6 +15,8 @@ namespace GitHubUpdater.WPF
 
     private void App_OnStartup(object sender, StartupEventArgs e)
     {
+      App.Current.DispatcherUnhandledException += (o, args) => o.Error(args.Exception);
+
       option = Option.CreateFromArgs();
       var viewModel = new UpdateViewModel(option);
 

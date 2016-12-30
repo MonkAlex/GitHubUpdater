@@ -18,7 +18,7 @@ namespace GitHubUpdater.Shared
     [Option("version", Required = false, HelpText = "Current app version. If null, redownload.")]
     public string Version { get; set; }
 
-    [Option("mask", Required = false, HelpText = "Download file mask in regex pattern format. For example - \"win64.zip$\".")]
+    [Option("downloadMask", Required = false, HelpText = "Download file mask in regex pattern format. For example - \"win64.zip$\".")]
     public string DownloadMask { get; set; }
 
     [Option("outputFolder", Required = true, HelpText = "Folder to save update content. Absoulte path, for example - \"C:\\App\\\".")]
