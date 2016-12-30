@@ -8,7 +8,7 @@
 
 Рабочий пример для скачивания:
 
-GitHubUpdater.CLI.exe --repositoryId="15127462" --mask "win64.zip$" --outputFolder="D:\Soft\livestreamer" --unpack --unpackFolder="livestreamer-twitch-gui"
+GitHubUpdater.Launcher.exe --repositoryId="15127462" --outputFolder="D:\livestreamer" --unpack --unpackRootSubfolder --runAfterUpdate="twitch-gui.exe$" --mask "win64.zip$"
 
 ***
 
