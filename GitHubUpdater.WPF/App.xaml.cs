@@ -18,10 +18,10 @@ namespace GitHubUpdater.WPF
       if (!e.Args.Any())
       {
         MessageBox.Show("Run from launcher.");
-        return;
+        Current.Shutdown(0);
       }
 
-      App.Current.DispatcherUnhandledException += (o, args) => o.Error(args.Exception);
+      Current.DispatcherUnhandledException += (o, args) => o.Error(args.Exception);
 
       option = Option.CreateFromArgs();
       var viewModel = new UpdateViewModel(option);

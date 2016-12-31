@@ -136,7 +136,7 @@ namespace GitHubUpdater.Shared
 
 
 
-    public static async Task<T> TryExecuteAsync<T>(Func<Task<T>> action, Task<T> whenIgnored, Func<Exception, IExceptionReaction> args)
+    public static async Task<T> TryExecuteAsync<T>(Func<Task<T>> action, T whenIgnored, Func<Exception, IExceptionReaction> args)
     {
       IExceptionReaction handled = UpdateExceptionReaction.Retry;
       while (handled.Value == UpdateExceptionReaction.Retry.Value)
@@ -161,7 +161,7 @@ namespace GitHubUpdater.Shared
           }
         }
       }
-      return await whenIgnored;
+      return whenIgnored;
     }
 /*
     private static TY OnHandler<TX, TY>(TX e) 

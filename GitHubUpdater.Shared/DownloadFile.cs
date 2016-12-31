@@ -27,9 +27,11 @@ namespace GitHubUpdater.Shared
     {
       try
       {
-        return await Shared.ExceptionHandler.TryExecuteAsync(() => DownloadImpl(progress, target),
-          Task.FromResult(false),
-          OnExceptionThrowed);
+        var content = await ExceptionHandler.TryExecuteAsync(() => DownloadImpl(progress), null, OnExceptionThrowed);
+        if (content == null)
+          return false;
+
+        return await ExceptionHandler.TryExecuteAsync(() => SaveImpl(content, target), false, OnExceptionThrowed);
       }
       catch (Exception)
       {
@@ -44,7 +46,21 @@ namespace GitHubUpdater.Shared
       return args.Handled;
     }
 
-    private async Task<bool> DownloadImpl(IProgress<DownloadProgress> progress, string target)
+    private async Task<bool> SaveImpl(byte[] content, string target)
+    {
+      var folder = Path.GetDirectoryName(target);
+      if (!Directory.Exists(folder))
+        Directory.CreateDirectory(folder);
+
+      using (var targetFile = File.OpenWrite(target))
+      {
+        await targetFile.WriteAsync(content, 0, content.Length).ConfigureAwait(false);
+      }
+
+      return true;
+    }
+
+    private async Task<byte[]> DownloadImpl(IProgress<DownloadProgress> progress)
     {
       var webClient = new WebClient();
       if (progress != null)
@@ -58,18 +74,7 @@ namespace GitHubUpdater.Shared
           };
           progress.Report(state);
         };
-      var content = await webClient.DownloadDataTaskAsync(Uri).ConfigureAwait(false);
-
-      var folder = Path.GetDirectoryName(target);
-      if (!Directory.Exists(folder))
-        Directory.CreateDirectory(folder);
-
-      using (var targetFile = File.OpenWrite(target))
-      {
-        await targetFile.WriteAsync(content, 0, content.Length).ConfigureAwait(false);
-      }
-
-      return true;
+      return await webClient.DownloadDataTaskAsync(Uri).ConfigureAwait(false);
     }
 
     public DownloadFile(ReleaseAsset asset, string tag)
