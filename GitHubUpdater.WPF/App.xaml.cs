@@ -15,6 +15,12 @@ namespace GitHubUpdater.WPF
 
     private void App_OnStartup(object sender, StartupEventArgs e)
     {
+      if (!e.Args.Any())
+      {
+        MessageBox.Show("Run from launcher.");
+        return;
+      }
+
       App.Current.DispatcherUnhandledException += (o, args) => o.Error(args.Exception);
 
       option = Option.CreateFromArgs();

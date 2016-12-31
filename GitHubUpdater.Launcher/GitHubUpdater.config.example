@@ -1,0 +1,11 @@
+﻿{
+  "RepositoryId": 66179868,
+  "Version": "0.0.0.3",
+  "DownloadMask": null,
+  "OutputFolder": "D:\\GitHubUpdater\\",
+  "Unpack": true,
+  "UnpackRootSubfolder": false,
+  "RunAfterUpdate": null,
+  "FromFile": null,
+  "Silent": false
+}

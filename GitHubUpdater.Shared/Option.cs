@@ -91,7 +91,12 @@ namespace GitHubUpdater.Shared
     public static Option CreateFromArgs(params string[] args)
     {
       var options = new Option();
-      Parser.Default.ParseArguments(args, options);
+      if (!Parser.Default.ParseArguments(args, options))
+      {
+        if (args.Length == 2)
+          options.FromFile = args[1];
+      }
+
       if (File.Exists(options.FromFile))
       {
         var fromfile = Load(options.FromFile);

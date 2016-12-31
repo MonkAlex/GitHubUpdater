@@ -14,6 +14,17 @@ namespace GitHubUpdater.Launcher
     static void Main(string[] args)
     {
       var directory = AppDomain.CurrentDomain.BaseDirectory;
+      if (!args.Any())
+      {
+        var configs = Directory.GetFiles(directory, "*.config", SearchOption.TopDirectoryOnly);
+        var defaultConfig = configs.FirstOrDefault();
+        if (configs.Length > 1)
+          defaultConfig = configs.FirstOrDefault(c => Path.GetFileName(c) == "default.config");
+
+        if (defaultConfig != null)
+          args = new[] { defaultConfig };
+      }
+
       Shared.Log.Debug(typeof(Program), $"App started form {directory}. Args - '{string.Join(" ", args)}'");
       var versions = Directory.GetDirectories(directory);
       if (!versions.Any())
@@ -22,19 +33,20 @@ namespace GitHubUpdater.Launcher
       }
 
       var lastVersion = versions
-        .Select(v => new {path = v, version = new Version(Path.GetFileName(v))})
+        .Select(v => new { path = v, version = new Version(Path.GetFileName(v)) })
         .OrderByDescending(c => c.version)
         .First();
 
       Shared.Log.Debug(typeof(Program), $"Version {lastVersion.version} selected.");
 
-      var selfupdate = $"--fromFile=\"{directory}default.config\" " +
+      var selfupdate = $"--repositoryId=\"66179868\" " +
+                       $"--unpack " +
                        $"--version=\"{lastVersion.version}\" " +
                        $"--silent " +
                        $"--outputFolder=\"{directory}";
       var selfThread = new Thread(() =>
       {
-        InitVersion(lastVersion.path, new[] {selfupdate});
+        InitVersion(lastVersion.path, new[] { selfupdate });
         Shared.Log.Debug(typeof(Program), $"Selfupdate runned...");
       });
       selfThread.Start();
@@ -53,7 +65,7 @@ namespace GitHubUpdater.Launcher
       if (thread != null)
         thread.Join();
 
-      Environment.Exit((int) code);
+      Environment.Exit((int)code);
     }
 
     private static ExitCodes InitVersion(string lastVersion, string[] args)
