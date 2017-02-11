@@ -1,23 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
-using System.Runtime.InteropServices;
-using System.Text;
 
-namespace GitHubUpdater.WPF
+namespace GitHubUpdater.Shared
 {
   public static class Helper
   {
-
-    [DllImport("Shlwapi.dll", CharSet = CharSet.Auto)]
-    public static extern long StrFormatByteSize(long fileSize, System.Text.StringBuilder buffer, int bufferSize);
-
-    public static string HumanizeByteSize(this long bytes)
+    public static string HumanizeByteSize(this long byteCount)
     {
-      var sb = new StringBuilder(11);
-      StrFormatByteSize(bytes, sb, sb.Capacity);
-      return sb.ToString();
+      string[] suf = { "B", "KB", "MB", "GB", "TB", "PB", "EB" }; //Longs run out around EB
+      if (byteCount == 0)
+        return "0" + suf[0];
+      long bytes = Math.Abs(byteCount);
+      int place = Convert.ToInt32(Math.Floor(Math.Log(bytes, 1024)));
+      double num = Math.Round(bytes / Math.Pow(1024, place), 1);
+      return Math.Sign(byteCount) * num + suf[place];
     }
   }
 
@@ -29,7 +26,7 @@ namespace GitHubUpdater.WPF
       foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
       {
         types.AddRange(assembly.GetTypes()
-          .Where(t => !t.IsAbstract && t.IsClass && typeof (T).IsAssignableFrom(t)));
+          .Where(t => !t.IsAbstract && t.IsClass && typeof(T).IsAssignableFrom(t)));
       }
       return types;
     }

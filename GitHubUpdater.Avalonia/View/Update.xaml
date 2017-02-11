@@ -1,0 +1,3 @@
+﻿<Window xmlns="https://github.com/avaloniaui" Title="{Binding Title}" Height="120" Width="450">
+  <ContentPresenter Content="{Binding}"/>
+</Window>
