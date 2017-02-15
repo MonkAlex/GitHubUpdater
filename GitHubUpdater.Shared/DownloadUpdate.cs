@@ -14,6 +14,10 @@ namespace GitHubUpdater.Shared
   {
     public Option Option { get; }
 
+    public string ProductName { get; private set; }
+
+    public string Version { get; private set; }
+
     public async Task<bool> HasUpdate()
     {
       try
@@ -63,10 +67,14 @@ namespace GitHubUpdater.Shared
       return assets.Select(a => new DownloadFile(a, release.TagName));
     }
 
-    private Task<Release> GetLatestRelease()
+    private async Task<Release> GetLatestRelease()
     {
       var client = new GitHubClient(new ProductHeaderValue(string.Format("MonkAlex-{0}-{1}", Option.RepositoryId, Option.Version)));
-      return client.Repository.Release.GetLatest(Option.RepositoryId);
+      var repo = await client.Repository.Get(Option.RepositoryId);
+      this.ProductName = repo.Name;
+      var release = await client.Repository.Release.GetLatest(Option.RepositoryId);
+      this.Version = release.TagName;
+      return release;
     }
 
     public DownloadUpdate(Option option)

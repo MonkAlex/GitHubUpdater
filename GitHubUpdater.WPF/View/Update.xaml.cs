@@ -36,14 +36,5 @@ namespace GitHubUpdater.WPF.View
 
       Close();
     }
-
-    private void Update_OnContentRendered(object sender, EventArgs e)
-    {
-      var model = DataContext as UpdateViewModel;
-      if (model != null && model.Start != null && model.Start.CanExecute(null))
-      {
-        model.Start.Execute(null);
-      }
-    }
   }
 }

@@ -6,6 +6,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using GitHubUpdater.Shared;
 using GitHubUpdater.WPF.ViewModel;
+using Ookii.Dialogs.Wpf;
 
 namespace GitHubUpdater.WPF.Command
 {
@@ -19,10 +20,61 @@ namespace GitHubUpdater.WPF.Command
 
       try
       {
+        var download = new DownloadUpdate(model.Option);
+        var hasUpdate = await download.HasUpdate();
+        if (!hasUpdate)
+        {
+          this.Debug("Updates not found.");
+          App.Current.Shutdown(0);
+          return;
+        }
+
+        if (!model.Option.Silent)
+        {
+          var window = App.Current.MainWindow;
+          var dialog = new Ookii.Dialogs.Wpf.TaskDialog();
+          dialog.WindowTitle = download.ProductName;
+          dialog.Content = "Перед обновлением закройте приложение.";
+          if (string.IsNullOrWhiteSpace(model.Option.Version))
+          {
+            dialog.MainInstruction = string.Format("Установить {0} версии {1}?",
+              download.ProductName, download.Version);
+          }
+          else
+          {
+            dialog.MainInstruction = string.Format("Установить обновление для {2}{3}с {1} до {0}?",
+              download.Version, model.Option.Version, download.ProductName, Environment.NewLine);
+            Version oldVersion;
+            if (Version.TryParse(model.Option.Version, out oldVersion))
+            {
+              Version newVersion;
+              if (Version.TryParse(download.Version, out newVersion))
+              {
+                if (oldVersion.CompareTo(newVersion) > 0)
+                {
+                  dialog.Content += Environment.NewLine;
+                  dialog.Content += "Доступная версия ниже установленной.";
+                }
+              }
+            }
+          }
+          var yes = new TaskDialogButton(ButtonType.Yes);
+          var no = new TaskDialogButton(ButtonType.No);
+          dialog.Buttons.Add(yes);
+          dialog.Buttons.Add(no);
+          if (dialog.ShowDialog(window) != yes)
+          {
+            this.Debug("User cancel update.");
+            App.Current.Shutdown(0);
+            return;
+          }
+
+          window.Show();
+        }
+
         model.ProgressState = ProgressState.Normal;
         model.State = ConvertState.Started;
 
-        var download = new DownloadUpdate(model.Option);
         foreach (var file in await download.GetFiles())
         {
           this.Debug($"File {file.Name} ({file.Uri}) found.");

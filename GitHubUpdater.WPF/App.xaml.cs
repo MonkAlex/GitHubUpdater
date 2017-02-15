@@ -37,7 +37,7 @@ namespace GitHubUpdater.WPF
       {
         var window = new Update();
         window.DataContext = viewModel;
-        window.Show();
+        viewModel.Start.Execute(this);
       }
     }
 
