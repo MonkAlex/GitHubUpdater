@@ -1,26 +1,35 @@
 ﻿using System;
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using GitHubUpdater.Avalonia.ViewModel;
 
 namespace GitHubUpdater.Avalonia.View
 {
-  public class Update : Window
+  public class Update : Window, IDisposable
   {
+    private readonly IDisposable subToDataContext;
+
     public Update()
     {
       this.InitializeComponent();
       App.AttachDevTools(this);
-      this.DataContextChanged += OnDataContextChanged;
+      this.Closed += OnClosed;
+      subToDataContext = this.GetObservableWithHistory(DataContextProperty).Subscribe(OnDataContextChanged);
     }
 
-    private void OnDataContextChanged(object sender, EventArgs e)
+    private void OnClosed(object sender, EventArgs eventArgs)
     {
-      var oldValue = e.OldValue as IProcess;
+      Dispose();
+    }
+
+    private void OnDataContextChanged(Tuple<object, object> sub)
+    {
+      var oldValue = sub.Item1 as IProcess;
       if (oldValue != null)
         oldValue.StateChanged -= OnStateChanged;
 
-      var value = e.NewValue as IProcess;
+      var value = sub.Item2 as IProcess;
       if (value != null)
         value.StateChanged += OnStateChanged;
     }
@@ -30,12 +39,18 @@ namespace GitHubUpdater.Avalonia.View
       if (convertState != ConvertState.Completed)
         return;
 
-      Close();
+      Dispose();
     }
 
     private void InitializeComponent()
     {
       AvaloniaXamlLoader.Load(this);
+    }
+
+    public void Dispose()
+    {
+      Close();
+      subToDataContext?.Dispose();
     }
   }
 }

@@ -1,3 +1,33 @@
-﻿<Window xmlns="https://github.com/avaloniaui" Title="{Binding Title}" Height="120" Width="450">
+﻿<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:viewModel="clr-namespace:GitHubUpdater.Avalonia.ViewModel;assembly=GitHubUpdater.Avalonia"
+        Title="{Binding Title}" Height="120" Width="450">
+  <Window.DataTemplates>
+    <DataTemplate DataType="{x:Type viewModel:DownloadedFileViewModel}">
+      <Grid Margin="5">
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="*"/>
+          <ColumnDefinition Width="*"/>
+          <ColumnDefinition Width="Auto"/>
+          <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+        <TextBlock Grid.Column="0"
+                   Margin="5"
+                   Text="{Binding Name}"/>
+        <ProgressBar Grid.Column="1"
+                     Margin="5"
+                     Minimum="0" Maximum="1" Value="{Binding Downloaded}"/>
+        <TextBlock Grid.Column="1"
+                   Margin="5"
+                   Text="{Binding DownloadText}"
+                   TextAlignment="Center">
+        </TextBlock>
+      </Grid>
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type viewModel:UpdateViewModel}">
+      <ListBox Items="{Binding DownloadedFiles}"/>
+    </DataTemplate>
+  </Window.DataTemplates>
   <ContentPresenter Content="{Binding}"/>
 </Window>
