@@ -63,7 +63,25 @@ namespace GitHubUpdater.Shared.Archive
             else
             {
               Directory.CreateDirectory(Path.GetDirectoryName(fullPath));
-              entry.ExtractToFile(fullPath, true);
+              var needExtract = true;
+              if (System.IO.File.Exists(fullPath))
+              {
+                using (var content = new MemoryStream())
+                using (var entryStream = entry.Open())
+                using (var file = new FileStream(fullPath, FileMode.Open, FileAccess.Read, FileShare.Read, 4096))
+                {
+                  entryStream.CopyTo(content);
+                  byte[] onDisk = new byte[file.Length];
+                  file.Read(onDisk, 0, (int)file.Length);
+                  if (onDisk.SequenceEqual(content.ToArray()))
+                  {
+                    needExtract = false;
+                    this.Debug($"File {fullPath} already exists and no changes found.");
+                  }
+                }
+              }
+              if (needExtract)
+                entry.ExtractToFile(fullPath, true);
             }
           }, OnExceptionThrowed);
         }

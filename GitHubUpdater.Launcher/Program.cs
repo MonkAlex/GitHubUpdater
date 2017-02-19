@@ -14,7 +14,7 @@ namespace GitHubUpdater.Launcher
   {
     static void Main(string[] args)
     {
-      var directory = AppDomain.CurrentDomain.BaseDirectory;
+      var directory = AppDomain.CurrentDomain.BaseDirectory.TrimEnd('\\');
       if (!args.Any())
       {
         var configs = Directory.GetFiles(directory, "*.config", SearchOption.TopDirectoryOnly);
@@ -27,7 +27,7 @@ namespace GitHubUpdater.Launcher
       }
 
       // Переэкранировать параметры.
-      args = args.Select(a => a.Contains(" ") ? "\"" + a + "\"" : a).ToArray();
+      args = args.Select(a => a.Contains(" ") ? "\"" + a.TrimEnd('"').TrimEnd('\\') + "\"" : a).ToArray();
       var formatedArgs = string.Join(" ", args);
       Shared.Log.Debug(typeof(Program), $"App started form {directory}. Args - '{formatedArgs}'");
       var versions = Directory.GetDirectories(directory);
@@ -51,7 +51,7 @@ namespace GitHubUpdater.Launcher
       var selfThread = new Thread(() =>
       {
         InitVersion(lastVersion.path, selfupdate);
-        Shared.Log.Debug(typeof(Program), $"Selfupdate runned...");
+        Shared.Log.Debug(typeof(Program), $"Selfupdate runned... Args - '{selfupdate}'");
       });
       selfThread.Start();
       var code = InitVersion(lastVersion.path, formatedArgs);

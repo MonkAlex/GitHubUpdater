@@ -21,7 +21,7 @@ namespace GitHubUpdater.WPF.Command
 
     private void UpdateDialogTexts(string text, string description)
     {
-      dialog.ReportProgress((int) (model.Percent*100), text, description);
+      dialog?.ReportProgress((int) (model.Percent*100), text, description);
     }
 
     public override void Execute(object parameter)
@@ -135,9 +135,9 @@ namespace GitHubUpdater.WPF.Command
 
     private void ProgressOnRunWorkerCompleted(object sender, RunWorkerCompletedEventArgs runWorkerCompletedEventArgs)
     {
-      if (runWorkerCompletedEventArgs.Error != null)
+      if (runWorkerCompletedEventArgs?.Error != null)
         throw runWorkerCompletedEventArgs.Error;
-
+      
       model.State = ConvertState.Completed;
       App.Shutdown();
     }

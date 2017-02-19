@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
@@ -52,6 +53,20 @@ namespace GitHubUpdater.Shared
       var folder = Path.GetDirectoryName(target);
       if (!Directory.Exists(folder))
         Directory.CreateDirectory(folder);
+
+      if (File.Exists(target))
+      {
+        using (var file = new FileStream(target, System.IO.FileMode.Open, FileAccess.Read, FileShare.Read, 4096, true))
+        {
+          byte[] onDisk = new byte[file.Length];
+          await file.ReadAsync(onDisk, 0, (int)file.Length);
+          if (onDisk.SequenceEqual(content))
+          {
+            this.Debug($"File {target} already exists and no changes found.");
+            return true;
+          }
+        }
+      }
 
       using (var targetFile = File.OpenWrite(target))
       {
