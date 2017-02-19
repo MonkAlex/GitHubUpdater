@@ -1,8 +1,8 @@
-﻿using System.Linq;
-using System.Threading;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 using GitHubUpdater.Shared;
-using GitHubUpdater.WPF.View;
 using GitHubUpdater.WPF.ViewModel;
 using Ookii.Dialogs.Wpf;
 
@@ -57,9 +57,7 @@ namespace GitHubUpdater.WPF
         return;
       }
 
-      var handled = Current.Dispatcher.Invoke(() =>
-        AbortRetryIgnore.ShowDialog(Current.Windows.OfType<Window>().LastOrDefault(), e.Exception.Message));
-      e.Handled = UpdateExceptionReaction.GetAll().Single(r => r.Value == handled.Value);
+      e.Handled = Current.Dispatcher.Invoke(() => AbortRetryIgnore<UpdateExceptionReaction>(e.Exception));
     }
 
     public static void ExceptionHandlerOnHandler(object sender, DownloadExceptionEventArgs e)
@@ -71,9 +69,39 @@ namespace GitHubUpdater.WPF
         return;
       }
 
-      var handled = Current.Dispatcher.Invoke(() =>
-        AbortRetryIgnore.ShowDialog(Current.Windows.OfType<Window>().LastOrDefault(), e.Exception.Message));
-      e.Handled = DownloadExceptionReaction.GetAll().Single(r => r.Value == handled.Value);
+      e.Handled = Current.Dispatcher.Invoke(() => AbortRetryIgnore<DownloadExceptionReaction>(e.Exception));
+    }
+
+    private static T AbortRetryIgnore<T>(Exception ex) where T : Enumeration<T, string>, IExceptionReaction
+    {
+      var reactions = new List<T>();
+      reactions.AddRange(DownloadExceptionReaction.GetAll().OfType<T>());
+      reactions.AddRange(UpdateExceptionReaction.GetAll().OfType<T>());
+
+      using (var task = new TaskDialog())
+      {
+        task.WindowTitle = "Error";
+        task.MainIcon = TaskDialogIcon.Error;
+        task.Content = ex.Message;
+        var exceptionString = ex.ToString();
+        task.ExpandedInformation = exceptionString;
+        task.FooterIcon = TaskDialogIcon.Information;
+        task.Footer = "<a href=\"\">Скопировать в буфер детали исключения</a>";
+        task.EnableHyperlinks = true;
+        task.HyperlinkClicked += (s, a) => Clipboard.SetText(exceptionString);
+        var abort = new TaskDialogButton() { Text = "Отмена" };
+        task.Buttons.Add(abort);
+        var retry = new TaskDialogButton() { Text = "Повторить" };
+        task.Buttons.Add(retry);
+        var ignore = new TaskDialogButton() { Text = "Продолжить" };
+        task.Buttons.Add(ignore);
+        var showed = task.ShowDialog();
+        if (showed == abort)
+          return reactions.Single(r => r.Value == UpdateExceptionReaction.Abort.Value);
+        if (showed == ignore)
+          return reactions.Single(r => r.Value == UpdateExceptionReaction.Ignore.Value);
+        return reactions.Single(r => r.Value == UpdateExceptionReaction.Retry.Value);
+      }
     }
   }
 }

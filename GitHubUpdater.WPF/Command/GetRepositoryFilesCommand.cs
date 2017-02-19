@@ -17,6 +17,13 @@ namespace GitHubUpdater.WPF.Command
   {
     private UpdateViewModel model;
 
+    private ProgressDialog dialog;
+
+    private void UpdateDialogTexts(string text, string description)
+    {
+      dialog.ReportProgress((int) (model.Percent*100), text, description);
+    }
+
     public override void Execute(object parameter)
     {
       base.Execute(parameter);
@@ -61,17 +68,17 @@ namespace GitHubUpdater.WPF.Command
 
     private void ExecuteInUI(DownloadUpdate download, CancellationTokenSource token)
     {
-      var dialog = new Ookii.Dialogs.Wpf.TaskDialog();
-      dialog.WindowTitle = download.ProductName;
-      dialog.Content = "Перед обновлением закройте приложение.";
+      var taskDialog = new TaskDialog();
+      taskDialog.WindowTitle = download.ProductName;
+      taskDialog.Content = "Перед обновлением закройте приложение.";
       if (string.IsNullOrWhiteSpace(model.Option.Version))
       {
-        dialog.MainInstruction = string.Format("Установить {0} версии {1}?",
+        taskDialog.MainInstruction = string.Format("Установить {0} версии {1}?",
           download.ProductName, download.Version);
       }
       else
       {
-        dialog.MainInstruction = string.Format("Установить обновление для {2}{3}с {1} до {0}?",
+        taskDialog.MainInstruction = string.Format("Установить обновление для {2}{3}с {1} до {0}?",
           download.Version, model.Option.Version, download.ProductName, Environment.NewLine);
         Version oldVersion;
         if (Version.TryParse(model.Option.Version, out oldVersion))
@@ -81,51 +88,64 @@ namespace GitHubUpdater.WPF.Command
           {
             if (oldVersion.CompareTo(newVersion) > 0)
             {
-              dialog.Content += Environment.NewLine;
-              dialog.Content += "Доступная версия ниже установленной.";
+              taskDialog.Content += Environment.NewLine;
+              taskDialog.Content += "Доступная версия ниже установленной.";
             }
           }
         }
       }
       var yes = new TaskDialogButton(ButtonType.Yes);
       var no = new TaskDialogButton(ButtonType.No);
-      dialog.Buttons.Add(yes);
-      dialog.Buttons.Add(no);
-      if (dialog.ShowDialog() != yes)
+      taskDialog.Buttons.Add(yes);
+      taskDialog.Buttons.Add(no);
+      if (taskDialog.ShowDialog() != yes)
       {
         this.Debug("User cancel update.");
         App.Shutdown();
       }
 
-      var progress = new ProgressDialog();
-      progress.DoWork += (s, args) =>
+      dialog = new ProgressDialog();
+      dialog.WindowTitle = download.ProductName;
+      dialog.DoWork += (s, args) =>
       {
         InternalExecute(download, token.Token).Wait(token.Token);
       };
 
-      progress.ProgressChanged += (sender, args) =>
+      dialog.ProgressChanged += (sender, args) =>
       {
-        if (progress.CancellationPending)
+        if (dialog.CancellationPending)
           token.Cancel();
       };
 
       model.PropertyChanged += (s, args) =>
       {
-        if (progress.IsBusy && args.PropertyName == nameof(model.Percent))
-          progress.ReportProgress((int) (model.Percent*100));
+        try
+        {
+          if (dialog.IsBusy && args.PropertyName == nameof(model.Percent))
+            dialog.ReportProgress((int)(model.Percent * 100));
+        }
+        catch (Exception ex)
+        {
+          this.Debug(ex);
+        }
       };
-      progress.ShowDialog();
-      progress.RunWorkerCompleted += ProgressOnRunWorkerCompleted;
+      dialog.ShowDialog();
+      dialog.RunWorkerCompleted += ProgressOnRunWorkerCompleted;
     }
 
     private void ProgressOnRunWorkerCompleted(object sender, RunWorkerCompletedEventArgs runWorkerCompletedEventArgs)
     {
+      if (runWorkerCompletedEventArgs.Error != null)
+        throw runWorkerCompletedEventArgs.Error;
+
       model.State = ConvertState.Completed;
       App.Shutdown();
     }
 
     private async Task InternalExecute(DownloadUpdate download, CancellationToken token)
     {
+      UpdateDialogTexts("Идёт скачивание...", $"Скачивается {download.ProductName} версии {download.Version}");
+
       foreach (var file in await download.GetFiles())
       {
         this.Debug($"File {file.Name} ({file.Uri}) found.");
@@ -149,6 +169,8 @@ namespace GitHubUpdater.WPF.Command
 
       if (model.Option.Unpack)
       {
+        UpdateDialogTexts("Идёт распаковка...", string.Empty);
+
         this.Debug($"Unpack to {model.Option.OutputFolder} started.");
 
         var taskToUnpack = model.DownloadedFiles
@@ -162,6 +184,8 @@ namespace GitHubUpdater.WPF.Command
 
       if (!string.IsNullOrWhiteSpace(model.Option.RunAfterUpdate))
       {
+        UpdateDialogTexts("Запуск приложения...", string.Empty);
+
         if (File.Exists(model.Option.RunAfterUpdate))
         {
           this.Debug($"Run app - {model.Option.RunAfterUpdate}.");
