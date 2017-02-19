@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using GitHubUpdater.Shared;
@@ -51,10 +52,10 @@ namespace GitHubUpdater.WPF.ViewModel
       }
     }
 
-    public async Task<bool> Download(IProgress<DownloadProgress> args)
+    public async Task<bool> Download(IProgress<DownloadProgress> args, CancellationToken token)
     {
       file.ExceptionThrowed += GitHubUpdater.WPF.App.ExceptionHandlerOnHandler;
-      var task = file.Download(args, Target);
+      var task = file.Download(args, Target, token);
       task.ContinueWith(t =>
       {
         file.ExceptionThrowed -= GitHubUpdater.WPF.App.ExceptionHandlerOnHandler;

@@ -15,7 +15,7 @@ namespace GitHubUpdater.WPF.ViewModel
   {
     public Option Option { get; }
 
-    public ICommand Start { get; }
+    public GetRepositoryFilesCommand Start { get; }
 
     public ObservableCollection<DownloadedFileViewModel> DownloadedFiles { get; set; }
 

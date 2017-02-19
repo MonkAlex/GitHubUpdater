@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Net;
+using System.Threading;
 using System.Threading.Tasks;
 using Octokit;
 
@@ -18,16 +19,16 @@ namespace GitHubUpdater.Shared
 
     public event EventHandler<DownloadExceptionEventArgs> ExceptionThrowed;
 
-    public async Task<bool> Download(string target)
+    public async Task<bool> Download(string target, CancellationToken token)
     {
-      return await Download(null, target).ConfigureAwait(false);
+      return await Download(null, target, token).ConfigureAwait(false);
     }
 
-    public async Task<bool> Download(IProgress<DownloadProgress> progress, string target)
+    public async Task<bool> Download(IProgress<DownloadProgress> progress, string target, CancellationToken token)
     {
       try
       {
-        var content = await ExceptionHandler.TryExecuteAsync(() => DownloadImpl(progress), null, OnExceptionThrowed);
+        var content = await ExceptionHandler.TryExecuteAsync(() => DownloadImpl(progress, token), null, OnExceptionThrowed);
         if (content == null)
           return false;
 
@@ -60,7 +61,7 @@ namespace GitHubUpdater.Shared
       return true;
     }
 
-    private async Task<byte[]> DownloadImpl(IProgress<DownloadProgress> progress)
+    private async Task<byte[]> DownloadImpl(IProgress<DownloadProgress> progress, CancellationToken token)
     {
       var webClient = new WebClient();
       if (progress != null)
@@ -74,7 +75,7 @@ namespace GitHubUpdater.Shared
           };
           progress.Report(state);
         };
-      return await webClient.DownloadDataTaskAsync(Uri).ConfigureAwait(false);
+      return await webClient.DownloadDataTaskAsync(Uri).WithCancellation(token).ConfigureAwait(false);
     }
 
     public DownloadFile(ReleaseAsset asset, string tag)

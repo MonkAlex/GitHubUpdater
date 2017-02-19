@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
-namespace GitHubUpdater.Shared
+// ReSharper disable once CheckNamespace
+namespace GitHubUpdater
 {
   public static class Helper
   {
@@ -34,6 +37,15 @@ namespace GitHubUpdater.Shared
     public static IEnumerable<T> CreateAllTypes<T>(params object[] args)
     {
       return GetAllTypes<T>().Select(type => (T)Activator.CreateInstance(type, args));
+    }
+
+    public static async Task<T> WithCancellation<T>(this Task<T> task, CancellationToken cancellationToken)
+    {
+      var tcs = new TaskCompletionSource<bool>();
+      using (cancellationToken.Register(s => ((TaskCompletionSource<bool>)s).TrySetResult(true), tcs))
+        if (task != await Task.WhenAny(task, tcs.Task))
+          throw new OperationCanceledException(cancellationToken);
+      return await task;
     }
   }
 }

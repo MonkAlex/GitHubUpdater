@@ -1,8 +1,10 @@
 ﻿using System.Linq;
+using System.Threading;
 using System.Windows;
 using GitHubUpdater.Shared;
 using GitHubUpdater.WPF.View;
 using GitHubUpdater.WPF.ViewModel;
+using Ookii.Dialogs.Wpf;
 
 namespace GitHubUpdater.WPF
 {
@@ -29,16 +31,21 @@ namespace GitHubUpdater.WPF
       this.Debug($"App started, silent mode = {option.Silent}. Args - '{string.Join(" ", e.Args)}'");
       Current.Exit += (o, args) => this.Debug("App closed.");
 
-      if (option.Silent)
-      {
-        viewModel.Start.Execute(this);
-      }
+      viewModel.Start.Execute(this);
+    }
+
+    public new static void Shutdown()
+    {
+      var app = (App)Current;
+      app.ShutdownInternal();
+    }
+
+    private void ShutdownInternal()
+    {
+      if (Dispatcher.CheckAccess())
+        Shutdown(0);
       else
-      {
-        var window = new Update();
-        window.DataContext = viewModel;
-        viewModel.Start.Execute(this);
-      }
+        Dispatcher.Invoke(() => Shutdown(0));
     }
 
     public static void ExceptionHandlerOnHandler(object sender, UnpackExceptionEventArgs e)

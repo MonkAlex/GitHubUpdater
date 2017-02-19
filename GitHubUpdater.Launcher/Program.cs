@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.SymbolStore;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -25,7 +26,10 @@ namespace GitHubUpdater.Launcher
           args = new[] { defaultConfig };
       }
 
-      Shared.Log.Debug(typeof(Program), $"App started form {directory}. Args - '{string.Join(" ", args)}'");
+      // Переэкранировать параметры.
+      args = args.Select(a => a.Contains(" ") ? "\"" + a + "\"" : a).ToArray();
+      var formatedArgs = string.Join(" ", args);
+      Shared.Log.Debug(typeof(Program), $"App started form {directory}. Args - '{formatedArgs}'");
       var versions = Directory.GetDirectories(directory);
       if (!versions.Any())
       {
@@ -43,14 +47,14 @@ namespace GitHubUpdater.Launcher
                        $"--unpack " +
                        $"--version=\"{lastVersion.version}\" " +
                        $"--silent " +
-                       $"--outputFolder=\"{directory}";
+                       $"--outputFolder=\"{directory}\"";
       var selfThread = new Thread(() =>
       {
-        InitVersion(lastVersion.path, new[] { selfupdate });
+        InitVersion(lastVersion.path, selfupdate);
         Shared.Log.Debug(typeof(Program), $"Selfupdate runned...");
       });
       selfThread.Start();
-      var code = InitVersion(lastVersion.path, args);
+      var code = InitVersion(lastVersion.path, formatedArgs);
       Close(code, selfThread);
     }
 
@@ -68,7 +72,7 @@ namespace GitHubUpdater.Launcher
       Environment.Exit((int)code);
     }
 
-    private static ExitCodes InitVersion(string lastVersion, string[] args)
+    private static ExitCodes InitVersion(string lastVersion, string args)
     {
       try
       {
@@ -80,7 +84,7 @@ namespace GitHubUpdater.Launcher
 
         if (canBeStarted.Length == 1)
         {
-          var process = Process.Start(canBeStarted[0], string.Join(" ", args));
+          var process = Process.Start(canBeStarted[0], args);
           process.WaitForInputIdle();
           return ExitCodes.None;
         }

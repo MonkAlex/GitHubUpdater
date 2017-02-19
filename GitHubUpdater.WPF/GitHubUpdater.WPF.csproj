@@ -80,9 +80,6 @@
     <Compile Include="View\AbortRetryIgnore.xaml.cs">
       <DependentUpon>AbortRetryIgnore.xaml</DependentUpon>
     </Compile>
-    <Compile Include="View\Update.xaml.cs">
-      <DependentUpon>Update.xaml</DependentUpon>
-    </Compile>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -99,10 +96,6 @@
       <SubType>Code</SubType>
     </Compile>
     <Page Include="View\AbortRetryIgnore.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="View\Update.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

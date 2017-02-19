@@ -62,15 +62,7 @@ namespace GitHubUpdater.Shared
 
     void HandleException();
   }
-  /*
-  public interface IExceptionEventArgs<T, TX> 
-    : IExceptionEventArgs<T>
-    where T : IExceptionReaction
-    where TX : IExceptionEventArgs<T, TX>
-  {
-    EventHandler<IExceptionEventArgs<T, TX>> Handler { get; }
-  }
-  */
+
   public class UnpackExceptionEventArgs : IExceptionEventArgs<UpdateExceptionReaction>
   {
     public Exception Exception { get; }
@@ -117,6 +109,10 @@ namespace GitHubUpdater.Shared
         }
         catch (Exception ex)
         {
+          if (ex is OperationCanceledException)
+          {
+            return whenIgnored;
+          }
           handled = args(ex);
           if (handled != null)
           {
@@ -147,6 +143,10 @@ namespace GitHubUpdater.Shared
         }
         catch (Exception ex)
         {
+          if (ex is OperationCanceledException)
+          {
+            return whenIgnored;
+          }
           handled = args(ex);
           if (handled != null)
           {
@@ -163,21 +163,6 @@ namespace GitHubUpdater.Shared
       }
       return whenIgnored;
     }
-/*
-    private static TY OnHandler<TX, TY>(TX e) 
-      where TX : IExceptionEventArgs<object, TY>
-      where TY : IExceptionReaction
-    {
-      if (e.Handler == null || !e.Handler.GetInvocationList().Any())
-      {
-        ExceptionDispatchInfo.Capture(e.Exception).Throw();
-      }
-      else
-      {
-        e.Handler.Invoke(null, e);
-      }
-      return e.Handled;
-    }*/
   }
 
 }
