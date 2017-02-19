@@ -29,6 +29,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GitHubUpdater.Launcher", "G
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GitHubUpdater.Avalonia", "GitHubUpdater.Avalonia\GitHubUpdater.Avalonia.csproj", "{42A68FF1-87D2-4793-AF42-5489E0F5500F}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{0A0AC53D-55F8-4F14-8B20-5A0F5D8D2FDC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests", "Tests\Tests\Tests.csproj", "{517A373C-20B2-4A8E-89A5-819D8B1ECB63}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -55,8 +59,15 @@ Global
 		{42A68FF1-87D2-4793-AF42-5489E0F5500F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{42A68FF1-87D2-4793-AF42-5489E0F5500F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{42A68FF1-87D2-4793-AF42-5489E0F5500F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{517A373C-20B2-4A8E-89A5-819D8B1ECB63}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{517A373C-20B2-4A8E-89A5-819D8B1ECB63}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{517A373C-20B2-4A8E-89A5-819D8B1ECB63}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{517A373C-20B2-4A8E-89A5-819D8B1ECB63}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{517A373C-20B2-4A8E-89A5-819D8B1ECB63} = {0A0AC53D-55F8-4F14-8B20-5A0F5D8D2FDC}
 	EndGlobalSection
 EndGlobal
