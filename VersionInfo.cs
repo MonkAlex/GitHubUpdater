@@ -5,10 +5,10 @@
 // associated with an assembly.
 [assembly: AssemblyCompany("Intruders")]
 [assembly: AssemblyProduct("GitHub Updater")]
-[assembly: AssemblyCopyright("Copyright © Intruders 2016")]
+[assembly: AssemblyCopyright("Copyright © Intruders 2020")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
-[assembly: AssemblyVersion("0.0.0.9")]
+[assembly: AssemblyVersion("0.0.0.10")]

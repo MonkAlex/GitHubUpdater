@@ -20,6 +20,13 @@ namespace GitHubUpdater.Shared
 
     public event EventHandler<DownloadExceptionEventArgs> ExceptionThrowed;
 
+    internal static readonly Lazy<IWebProxy> SystemProxy = new Lazy<IWebProxy>(() =>
+    {
+      var proxy = WebRequest.GetSystemWebProxy();
+      proxy.Credentials = CredentialCache.DefaultCredentials;
+      return proxy;
+    });
+
     public async Task<bool> Download(string target, CancellationToken token)
     {
       return await Download(null, target, token).ConfigureAwait(false);
@@ -78,7 +85,7 @@ namespace GitHubUpdater.Shared
 
     private async Task<byte[]> DownloadImpl(IProgress<DownloadProgress> progress, CancellationToken token)
     {
-      var webClient = new WebClient();
+      var webClient = new WebClient { Proxy = SystemProxy.Value };
       if (progress != null)
         webClient.DownloadProgressChanged += (sender, args) =>
         {
